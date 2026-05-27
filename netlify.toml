@@ -1,0 +1,17 @@
+# Force HTTPS on all requests
+[[redirects]]
+  from = "http://lectio.honest-resources.com/*"
+  to   = "https://lectio.honest-resources.com/:splat"
+  status = 301
+  force  = true
+
+# Also handle bare http redirect
+[[redirects]]
+  from = "http://*"
+  to   = "https://:splat"
+  status = 301
+  force  = true
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
