@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lectio</title>
+<meta name="description" content="A beautiful, distraction-free Bible reader">
+<meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lectio">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+SC:wght@300;400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ──────────────────────────────────────── */
+:root {
+  --bg:#FFFFFF; --bg-sub:#F5F5F3; --text:#191919; --text-soft:#3A3530;
+  --text-muted:#888; --ghost:#B8B8B2; --col-rule:#E2E2DF; --border:#E4E4E1;
+  --shadow:rgba(0,0,0,.08); --accent:#191919;
+  --serif:'EB Garamond',Georgia,serif;
+  --display:'Cormorant Garamond',Georgia,serif;
+  --sc:'Cormorant SC',Georgia,serif;
+  --sans:'Jost',system-ui,sans-serif;
+  --base-size:18px; --bar-h:52px;
+  --line-height:1.84; --read-width:660px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+[data-theme="sepia"]{--bg:#F4E9D0;--bg-sub:#EDE0C3;--text:#251505;--text-soft:#4A2E10;--text-muted:#8A7040;--ghost:#B8A070;--col-rule:#D0BC96;--border:#D5C49A;--shadow:rgba(40,20,0,.1);--accent:#3D2005;}
+[data-theme="night"]{--bg:#141414;--bg-sub:#1C1C1C;--text:#E2DBD0;--text-soft:#BFB8AD;--text-muted:#706860;--ghost:#323230;--col-rule:#252523;--border:#242422;--shadow:rgba(0,0,0,.35);--accent:#E2DBD0;}
+@media(prefers-color-scheme:dark){[data-theme="auto"]{--bg:#141414;--bg-sub:#1C1C1C;--text:#E2DBD0;--text-soft:#BFB8AD;--text-muted:#706860;--ghost:#323230;--col-rule:#252523;--border:#242422;--shadow:rgba(0,0,0,.35);--accent:#E2DBD0;}}
+[data-size="small"]{--base-size:15px;}[data-size="medium"]{--base-size:18px;}[data-size="large"]{--base-size:22px;}
+[data-lh="tight"]{--line-height:1.5;}[data-lh="normal"]{--line-height:1.84;}[data-lh="loose"]{--line-height:2.2;}
+[data-rw="narrow"]{--read-width:520px;}[data-rw="normal"]{--read-width:660px;}[data-rw="wide"]{--read-width:820px;}
+[data-align="left"] .passage,[data-align="left"] .apibible-prose .apibible-content{text-align:left;hyphens:none;-webkit-hyphens:none;}
+[data-parsp="compact"] .verse-line{margin-bottom:.25em;}[data-parsp="normal"] .verse-line{margin-bottom:.55em;}[data-parsp="spacious"] .verse-line{margin-bottom:1em;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-size:var(--base-size);line-height:var(--line-height);-webkit-font-smoothing:antialiased;font-feature-settings:"kern" 1,"liga" 1,"onum" 1;transition:background-color .5s,color .5s;}
+
+/* ── Top bar (3-col) ─────────────────────────────── */
+.top-bar{position:fixed;inset:0 0 auto 0;height:calc(var(--bar-h) + var(--sat));padding-top:var(--sat);background:var(--bg);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-left:max(16px,var(--sal));padding-right:max(16px,var(--sar));z-index:50;transition:background-color .5s,border-color .5s;}
+.top-left{display:flex;align-items:center;justify-content:flex-start;min-width:0;}
+.top-mid{display:flex;align-items:center;justify-content:center;}
+.top-right{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
+.top-wordmark{font-family:var(--display);font-weight:400;font-style:italic;font-size:1.15rem;letter-spacing:.04em;color:var(--text);user-select:none;}
+.top-wordmark-right{display:none;}
+.top-ref{display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 12px 6px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s,background .2s;user-select:none;min-width:0;max-width:100%;}
+.top-ref:hover{border-color:var(--text-muted);}
+.top-book{font-family:var(--sc);font-weight:500;font-size:.82rem;letter-spacing:.2em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-sep{font-family:var(--sans);font-size:.62rem;color:var(--border);font-weight:300;flex-shrink:0;}
+.top-ch{font-family:var(--sc);font-weight:400;font-size:.82rem;letter-spacing:.16em;color:var(--text-soft);flex-shrink:0;}
+.top-hint{font-family:var(--sans);font-size:.6rem;font-weight:300;color:var(--text-muted);opacity:.7;flex-shrink:0;}
+/* Icon buttons in top bar */
+.icon-btn{width:36px;height:36px;background:transparent;border:1px solid transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all .2s;flex-shrink:0;}
+.icon-btn:hover{border-color:var(--border);color:var(--text);}
+.icon-btn svg{width:15px;height:15px;}
+.icon-btn.active{color:var(--accent);border-color:var(--accent);}
+
+/* ── Page ────────────────────────────────────────── */
+.page{padding-top:calc(var(--bar-h) + var(--sat));padding-bottom:96px;min-height:100vh;}
+.reading-surface{max-width:var(--read-width);margin:0 auto;padding:0 28px;transition:opacity .3s;}
+.reading-surface.loading{opacity:.2;pointer-events:none;}
+.reading-surface.compare-grid{max-width:1600px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0;}
+.compare-col{padding:0 28px;border-right:1px solid var(--col-rule);}
+.compare-col:last-child{border-right:none;}
+
+/* ── Chapter header ──────────────────────────────── */
+.chapter-meta{text-align:center;padding:64px 0 52px;}
+.meta-book{display:block;font-family:var(--sc);font-weight:400;font-size:.72rem;letter-spacing:.48em;color:var(--text-soft);margin-bottom:6px;}
+.meta-numeral{display:block;font-family:var(--display);font-weight:300;font-size:clamp(5rem,18vw,11rem);line-height:.9;color:var(--ghost);letter-spacing:-.02em;user-select:none;margin-bottom:28px;}
+.meta-rule{width:28px;height:1px;background:var(--col-rule);margin:0 auto;}
+.col-header{display:flex;justify-content:space-between;align-items:baseline;padding:40px 0 24px;margin-bottom:4px;border-bottom:1px solid var(--col-rule);}
+.col-ref{font-family:var(--sc);font-weight:400;font-size:.72rem;letter-spacing:.32em;color:var(--text-soft);}
+.col-name{font-family:var(--sans);font-size:.62rem;font-weight:300;letter-spacing:.12em;color:var(--text-muted);text-transform:uppercase;}
+
+/* ── Verse typography ────────────────────────────── */
+.passage{text-align:justify;hyphens:auto;-webkit-hyphens:auto;}
+.verse-line{position:relative;padding-right:1.6em;margin-bottom:.55em;}
+.verse-num{font-family:var(--sans);font-size:.62em;font-weight:600;color:var(--accent);opacity:.45;vertical-align:super;line-height:0;margin-right:.25em;margin-left:.1em;letter-spacing:0;}
+.drop-cap::first-letter{font-family:var(--display);font-weight:400;font-size:4em;line-height:.82;float:left;padding-right:.06em;padding-top:.08em;color:var(--text-soft);}
+.hide-verse-nums .verse-num,.hide-verse-nums .apibible-content [data-number]{display:none;}
+
+/* ── Verse star (bookmark) ───────────────────────── */
+.v-star{position:absolute;right:0;top:0;background:none;border:none;cursor:pointer;font-size:.8rem;line-height:var(--line-height);color:var(--text-muted);opacity:0;transition:opacity .15s,color .15s;padding:0;width:1.4em;text-align:center;}
+.verse-line:hover .v-star{opacity:.7;}
+.v-star.on{opacity:1;color:var(--accent);}
+@media(hover:none){.v-star{opacity:.3;}}
+
+/* ── Context menu ────────────────────────────────── */
+.ctx-menu{position:fixed;background:var(--bg);border:1px solid var(--border);border-radius:4px;box-shadow:0 8px 24px var(--shadow);padding:4px;z-index:200;min-width:140px;display:none;}
+.ctx-menu.open{display:block;}
+.ctx-item{display:block;width:100%;background:none;border:none;padding:9px 14px;font-family:var(--sans);font-size:.8rem;font-weight:300;color:var(--text-soft);cursor:pointer;text-align:left;border-radius:3px;transition:background .12s;}
+.ctx-item:hover{background:var(--bg-sub);}
+
+/* ── Toast ───────────────────────────────────────── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg);font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;padding:9px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:300;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── API.Bible injected HTML ─────────────────────── */
+.apibible-content [data-number]{font-family:var(--sans);font-size:.62em;font-weight:600;color:var(--accent);opacity:.45;vertical-align:super;line-height:0;margin-right:.25em;margin-left:.1em;letter-spacing:0;}
+.apibible-content .q1{display:block;padding-left:1.4em;text-align:left;}
+.apibible-content .q2{display:block;padding-left:2.8em;text-align:left;}
+.apibible-content .s1,.apibible-content .s2,.apibible-content .ms,.apibible-content .mr,.apibible-content .d{display:none;}
+.apibible-content .nd{font-variant:small-caps;}.apibible-content .add{font-style:italic;}
+.apibible-prose .apibible-content p,.apibible-prose .apibible-content .q1,.apibible-prose .apibible-content .q2{display:inline;padding-left:0;}
+.apibible-prose .apibible-content p::after{content:' ';}
+.apibible-prose .apibible-content{display:block;text-align:justify;}
+.apibible-drop .apibible-content>p:first-child::first-letter{font-family:var(--display);font-weight:400;font-size:4em;line-height:.82;float:left;padding-right:.06em;padding-top:.08em;color:var(--text-soft);}
+.copyright{margin-top:36px;padding-top:14px;border-top:1px solid var(--col-rule);font-family:var(--sans);font-size:.62rem;font-weight:300;letter-spacing:.06em;color:var(--text-muted);text-align:center;line-height:1.6;}
+
+/* ── Page nav ────────────────────────────────────── */
+.page-nav{max-width:var(--read-width);margin:64px auto 0;padding:24px 28px;border-top:1px solid var(--border);display:none;justify-content:space-between;align-items:center;}
+.reading-surface.compare-grid~.page-nav{max-width:1600px;}
+.nav-btn{background:none;border:none;font-family:var(--sans);font-size:.7rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:10px 0;transition:color .2s;min-width:44px;min-height:44px;display:flex;align-items:center;}
+.nav-btn:hover{color:var(--text);}.nav-btn:disabled{opacity:.25;cursor:default;}
+.status-msg{text-align:center;font-family:var(--display);font-style:italic;font-weight:300;color:var(--text-muted);padding:72px 0;font-size:1.2rem;}
+
+/* ── Settings panel ──────────────────────────────── */
+.settings-panel{position:fixed;inset:0 0 0 auto;width:300px;max-width:92vw;background:var(--bg-sub);border-left:1px solid var(--border);padding:0 0 calc(48px + var(--sab));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1),background-color .5s;z-index:60;box-shadow:-8px 0 32px var(--shadow);}
+.settings-panel.open{transform:translateX(0);}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 13px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-sub);z-index:1;transition:background-color .5s;}
+.settings-header h2{font-family:var(--sans);font-weight:300;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin:0;}
+.settings-close{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text-soft);cursor:pointer;font-family:var(--sans);font-size:.64rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.settings-close:hover{border-color:var(--text-muted);color:var(--text);}
+.settings-close svg{width:11px;height:11px;flex-shrink:0;}
+.settings-body{padding:20px 20px 0;}
+.s-sec{margin-bottom:26px;}
+.s-sec h3{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
+.s-field{display:flex;justify-content:space-between;align-items:center;padding:8px 0;min-height:44px;}
+.s-field label{font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text-soft);cursor:pointer;flex:1;}
+
+/* Toggle */
+.toggle{position:relative;width:36px;height:20px;background:var(--border);border-radius:10px;border:none;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.toggle.on{background:var(--accent);}.toggle.on::after{transform:translateX(16px);}
+[data-theme="night"] .toggle::after,[data-theme="auto"] .toggle::after{background:#141414;}
+
+/* Styled select */
+.styled-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 30px 9px 10px;font-family:var(--sans);font-size:.8rem;font-weight:300;color:var(--text);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 8px center;background-size:13px;}
+.styled-select:focus{outline:none;border-color:var(--text-muted);}
+
+/* Segmented */
+.segmented{display:flex;border:1px solid var(--border);border-radius:3px;overflow:hidden;background:var(--bg);}
+.segmented button{flex:1;background:transparent;border:none;padding:9px 4px;font-family:var(--sans);font-size:.62rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:all .2s;min-height:40px;}
+.segmented button.active{background:var(--accent);color:var(--bg);}
+
+/* Open-section button */
+.open-sec-btn{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:var(--sans);font-size:.8rem;font-weight:300;color:var(--text-soft);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:border-color .2s;min-height:44px;}
+.open-sec-btn:hover{border-color:var(--text-muted);}
+.open-sec-badge{font-family:var(--sc);font-size:.6rem;letter-spacing:.12em;color:var(--text-muted);}
+
+/* Comparison chips */
+.comp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;}
+.comp-chip{display:flex;align-items:center;gap:5px;background:var(--accent);color:var(--bg);border-radius:3px;padding:4px 8px;font-family:var(--sans);font-size:.68rem;font-weight:400;letter-spacing:.05em;}
+.chip-x{background:none;border:none;color:inherit;cursor:pointer;padding:0 0 0 2px;line-height:1;opacity:.65;font-size:1rem;transition:opacity .15s;display:flex;align-items:center;}
+.chip-x:hover{opacity:1;}
+.comp-empty{font-family:var(--sans);font-size:.76rem;font-weight:300;color:var(--text-muted);padding:2px 0;}
+.comp-typeahead{position:relative;}
+.comp-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 10px;font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text);outline:none;transition:border-color .2s;}
+.comp-input:focus{border-color:var(--text-muted);}
+.comp-input::placeholder{color:var(--text-muted);}
+.comp-dropdown{position:fixed;background:var(--bg);border:1px solid var(--border);border-radius:3px;box-shadow:0 8px 24px var(--shadow);max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:200;display:none;}
+.comp-dropdown.open{display:block;}
+.comp-opt{padding:10px 12px;font-family:var(--sans);font-size:.8rem;font-weight:300;color:var(--text-soft);cursor:pointer;transition:background .12s;display:flex;justify-content:space-between;align-items:center;min-height:44px;}
+.comp-opt:hover{background:var(--bg-sub);}
+.comp-opt.added{opacity:.35;pointer-events:none;}
+.comp-opt-abbr{font-family:var(--sc);font-size:.6rem;color:var(--text-muted);letter-spacing:.12em;}
+
+/* ── Modals (shared) ─────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:32px 28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:0 24px 64px rgba(0,0,0,.18);transition:background-color .5s;}
+.modal-card.wide{max-width:580px;}
+@media(max-width:520px){.modal-card{padding:24px 18px;}}
+.modal-title{font-family:var(--sans);font-weight:300;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--text-muted);font-family:var(--sans);font-size:.7rem;font-weight:300;letter-spacing:.1em;padding:4px;transition:color .2s;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:flex-end;}
+.modal-close:hover{color:var(--text);}
+.modal-sec{margin-bottom:28px;}
+.modal-sec:last-child{margin-bottom:0;}
+.modal-sec h3{font-family:var(--sans);font-weight:500;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-soft);margin-bottom:8px;}
+.modal-note{font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--text-muted);line-height:1.65;margin-bottom:12px;}
+
+/* ── API keys ────────────────────────────────────── */
+.key-wrap{position:relative;margin-bottom:6px;}
+.key-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:10px 50px 10px 12px;font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text);outline:none;transition:border-color .2s;}
+.key-input:focus{border-color:var(--text-muted);}
+.key-input::placeholder{color:var(--text-muted);}
+.key-save{position:absolute;right:0;top:0;bottom:0;background:var(--accent);border:none;border-radius:0 3px 3px 0;padding:0 14px;font-family:var(--sans);font-size:.62rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);cursor:pointer;transition:opacity .2s;}
+.key-save:hover{opacity:.75;}
+.key-status{font-family:var(--sans);font-size:.7rem;font-weight:300;color:var(--text-muted);min-height:18px;}
+.key-status.ok{color:#4E8044;}.key-status.err{color:#964040;}
+.key-link{display:inline-block;margin-top:8px;font-family:var(--sans);font-size:.7rem;font-weight:300;color:var(--text-muted);text-decoration:none;transition:color .2s;}
+.key-link:hover{color:var(--text);}
+.key-divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+/* ── Search overlay ──────────────────────────────── */
+.search-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;flex-direction:column;}
+.search-overlay.open{opacity:1;pointer-events:auto;}
+.search-bar{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.search-input-wrap{position:relative;flex:1;}
+.search-input{width:100%;background:var(--bg-sub);border:1px solid var(--border);border-radius:4px;padding:11px 16px 11px 40px;font-family:var(--serif);font-size:1rem;color:var(--text);outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--text-muted);}
+.search-input::placeholder{color:var(--text-muted);}
+.search-icon-inner{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+.search-icon-inner svg{width:15px;height:15px;}
+.search-close-btn{background:none;border:none;font-family:var(--sans);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:10px;min-height:44px;}
+.search-close-btn:hover{color:var(--text);}
+.search-hint{font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--text-muted);padding:8px 20px 0;}
+.search-results{flex:1;overflow-y:auto;padding:8px 16px 40px;}
+.sr-item{padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:3px;transition:background .12s;}
+.sr-item:hover{background:var(--bg-sub);}
+.sr-item:last-child{border-bottom:none;}
+.sr-ref{font-family:var(--sc);font-size:.66rem;letter-spacing:.2em;color:var(--text-muted);margin-bottom:4px;}
+.sr-text{font-family:var(--serif);font-size:.95rem;color:var(--text-soft);line-height:1.55;}
+.sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:48px 20px;font-size:1.1rem;}
+
+/* ── Bookmarks modal ─────────────────────────────── */
+.bk-item{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
+.bk-item:hover .bk-ref{color:var(--accent);}
+.bk-item:last-child{border-bottom:none;}
+.bk-info{flex:1;min-width:0;}
+.bk-ref{font-family:var(--sc);font-size:.66rem;letter-spacing:.2em;color:var(--text-muted);margin-bottom:4px;transition:color .15s;}
+.bk-text{font-family:var(--serif);font-size:.92rem;color:var(--text-soft);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.bk-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;opacity:.5;transition:opacity .15s;padding:4px;flex-shrink:0;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+.bk-del:hover{opacity:1;}
+.bk-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:36px 0;font-size:1.05rem;}
+
+/* ── Reading plan modal ──────────────────────────── */
+.plan-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid var(--border);}
+.plan-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 16px 10px;font-family:var(--sans);font-size:.7rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:all .2s;margin-bottom:-1px;}
+.plan-tab.active{color:var(--text);border-bottom-color:var(--accent);}
+.plan-day{font-family:var(--sans);font-size:.66rem;font-weight:300;color:var(--text-muted);letter-spacing:.08em;margin-bottom:12px;}
+.plan-passage{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-sub);border-radius:3px;margin-bottom:8px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
+.plan-passage:hover{border-color:var(--border);background:var(--bg);}
+.plan-passage-ref{font-family:var(--display);font-style:italic;font-weight:400;font-size:1.05rem;color:var(--text-soft);}
+.plan-passage-go{font-family:var(--sans);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+.plan-progress{margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+.plan-progress-bar{width:100%;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px;}
+.plan-progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease;}
+.plan-progress-label{font-family:var(--sans);font-size:.68rem;font-weight:300;color:var(--text-muted);}
+
+/* ── Book/chapter selector ───────────────────────── */
+.selector-overlay{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .28s;z-index:80;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:calc(60px + var(--sat)) max(20px,var(--sar)) calc(40px + var(--sab)) max(20px,var(--sal));}
+.selector-overlay.open{opacity:1;pointer-events:auto;}
+.selector-inner{max-width:740px;margin:0 auto;}
+.sel-close{position:fixed;top:calc(14px + var(--sat));right:max(20px,var(--sar));background:none;border:none;font-family:var(--sans);font-size:.62rem;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:10px;transition:color .2s;min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:flex-end;}
+.sel-close:hover{color:var(--text);}
+.testament-lbl{font-family:var(--sans);font-weight:400;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);text-align:center;margin:36px 0 18px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.testament-lbl:first-child{margin-top:0;}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:0 16px;}
+.book-btn{background:none;border:none;text-align:left;padding:8px 4px;font-family:var(--display);font-weight:400;font-size:1.05rem;color:var(--text-soft);cursor:pointer;transition:color .15s;min-height:44px;display:flex;align-items:center;}
+.book-btn:hover,.book-btn.active{color:var(--text);font-style:italic;}
+.ch-back{background:none;border:none;font-family:var(--sans);font-size:.62rem;font-weight:300;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;margin-bottom:24px;padding:8px 0;transition:color .2s;display:flex;align-items:center;gap:6px;}
+.ch-back:hover{color:var(--text);}
+.sel-book-title{font-family:var(--display);font-style:italic;font-weight:300;font-size:1.6rem;color:var(--text-soft);margin-bottom:28px;}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:4px;}
+.ch-btn{background:none;border:1px solid transparent;padding:10px 2px;text-align:center;font-family:var(--serif);font-size:.95rem;color:var(--text-soft);cursor:pointer;border-radius:3px;transition:all .15s;font-feature-settings:"onum" 1;min-height:44px;display:flex;align-items:center;justify-content:center;}
+.ch-btn:hover{border-color:var(--border);color:var(--text);}
+
+/* ── Bottom tab bar (mobile only) ───────────────────── */
+.bottom-tab-bar{display:none;}
+
+/* ── Mobile ──────────────────────────────────────── */
+@media(max-width:600px){
+  /* Reading */
+  .reading-surface{padding:0 18px;}
+  .page{padding-bottom:calc(64px + var(--sab));}
+  .page-nav{padding:20px 18px;}
+  .chapter-meta{padding:40px 0 32px;}
+  .compare-col{padding:0 16px;}
+  .top-hint{display:none;}
+  .top-wordmark{font-size:1rem;}
+
+  /* Wordmark moves to right on mobile (bottom tabs handle nav) */
+  .top-wordmark-centre{display:none;}
+  .top-wordmark-right{display:block;font-size:1rem;margin-right:2px;}
+  .top-mid{display:none;}
+
+  /* Top bar: on mobile the tab bar replaces the icon buttons */
+  #planBtn,#searchBtn,#bookmarksBtn,#settingsToggle{display:none;}
+
+  /* Smaller reference pill */
+  .top-ref{padding:5px 10px 5px 9px;}
+  .top-book{font-size:.76rem;}
+  .top-ch{font-size:.76rem;}
+
+  /* Settings panel: full-width, no left border, safe area */
+  .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
+
+  /* Prevent iOS input zoom (font-size must be ≥16px) */
+  .comp-input,.key-input,.search-input,select{font-size:16px !important;}
+
+  /* Modals as bottom sheets */
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-card{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;padding:28px 20px calc(28px + var(--sab));max-height:88vh;}
+  .modal-card.wide{max-width:100%;}
+
+  /* Plan tabs */
+  .plan-tab{padding:8px 10px 10px;font-size:.6rem;letter-spacing:.1em;}
+
+  /* Search */
+  .search-bar{padding:12px 14px 12px max(14px,var(--sal));}
+  .search-results{padding:8px 14px calc(40px + var(--sab));}
+
+  /* Book grid */
+  .book-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+
+  /* Bottom tab bar */
+  .bottom-tab-bar{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    height:calc(52px + var(--sab));
+    padding-bottom:var(--sab);
+    background:var(--bg);
+    border-top:1px solid var(--border);
+    z-index:50;
+    justify-content:space-around;
+    align-items:stretch;
+    transition:background-color .5s,border-color .5s;
+  }
+  .tab-btn{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    background:none;border:none;
+    color:var(--text-muted);
+    font-family:var(--sans);font-size:.5rem;
+    letter-spacing:.08em;text-transform:uppercase;
+    gap:4px;cursor:pointer;
+    padding:8px 4px 4px;
+    transition:color .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tab-btn svg{width:21px;height:21px;stroke-width:1.6;}
+  .tab-btn.tab-active{color:var(--accent);}
+  .tab-btn span{line-height:1;}
+}
+
+/* Very small phones */
+@media(max-width:360px){
+  .top-book{font-size:.7rem;letter-spacing:.12em;}
+  .top-wordmark{font-size:.9rem;}
+}
+</style>
+</head>
+<body data-theme="paper" data-size="medium" data-lh="normal" data-rw="normal" data-align="justify" data-parsp="normal">
+
+<!-- ── Top bar ─────────────────────────────────── -->
+<header class="top-bar">
+  <div class="top-left">
+    <div class="top-ref" id="referenceBtn" role="button" tabindex="0">
+      <span class="top-book" id="topBook">——</span>
+      <span class="top-sep">·</span>
+      <span class="top-ch" id="topCh">——</span>
+      <span class="top-hint">↓</span>
+    </div>
+  </div>
+  <div class="top-mid"><span class="top-wordmark top-wordmark-centre">Lectio</span></div>
+  <div class="top-right">
+    <span class="top-wordmark top-wordmark-right">Lectio</span>
+    <button class="icon-btn" id="planBtn" aria-label="Reading Plan" title="Reading Plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+    </button>
+    <button class="icon-btn" id="searchBtn" aria-label="Search" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <button class="icon-btn" id="bookmarksBtn" aria-label="Bookmarks" title="Bookmarks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    <button class="icon-btn" id="settingsToggle" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ── Reading surface ─────────────────────────── -->
+<div class="page">
+  <div id="readingSurface" class="reading-surface">
+    <div class="status-msg">A quiet place to read.</div>
+  </div>
+  <nav class="page-nav" id="pageNav">
+    <button class="nav-btn" id="prevBtn">← Previous</button>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </nav>
+</div>
+
+<!-- ── Context menu ───────────────────────────── -->
+<div class="ctx-menu" id="ctxMenu">
+  <button class="ctx-item" id="ctxCopy">Copy verse</button>
+  <button class="ctx-item" id="ctxBookmark">Bookmark</button>
+</div>
+
+<!-- ── Toast ──────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── Settings panel ─────────────────────────── -->
+<aside class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <h2>Reading</h2>
+    <button class="settings-close" id="settingsClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      Close
+    </button>
+  </div>
+  <div class="settings-body">
+    <div class="s-sec">
+      <h3>Translation</h3>
+      <select class="styled-select" id="translation1Select"></select>
+    </div>
+    <div class="s-sec">
+      <h3>Compare Translations</h3>
+      <div class="comp-chips" id="compChips"></div>
+      <div class="comp-typeahead">
+        <input type="text" class="comp-input" id="compInput" placeholder="Search to add…" autocomplete="off">
+        <div class="comp-dropdown" id="compDropdown"></div>
+      </div>
+    </div>
+    <div class="s-sec">
+      <h3>Format</h3>
+      <div class="s-field"><label>Verse numbers</label><button class="toggle" id="versNumToggle"></button></div>
+      <div class="s-field"><label>Chapter heading</label><button class="toggle" id="chHeadToggle"></button></div>
+      <div class="s-field"><label>Drop capital</label><button class="toggle" id="dropCapToggle"></button></div>
+      <div class="s-field"><label>Flowing prose</label><button class="toggle" id="proseToggle"></button></div>
+    </div>
+    <div class="s-sec">
+      <h3>Theme</h3>
+      <div class="segmented" id="themeCtrl">
+        <button data-value="paper" class="active">White</button>
+        <button data-value="sepia">Sepia</button>
+        <button data-value="night">Night</button>
+        <button data-value="auto">Auto</button>
+      </div>
+    </div>
+    <div class="s-sec">
+      <h3>Text Size</h3>
+      <div class="segmented" id="sizeCtrl">
+        <button data-value="small">S</button>
+        <button data-value="medium" class="active">M</button>
+        <button data-value="large">L</button>
+      </div>
+    </div>
+    <div class="s-sec">
+      <h3>Advanced</h3>
+      <button class="open-sec-btn" id="openAdvModal"><span>Typography &amp; Layout</span><span>↗</span></button>
+    </div>
+    <div class="s-sec">
+      <h3>Translation Keys</h3>
+      <button class="open-sec-btn" id="openKeysModal"><span>Manage API Keys</span><span class="open-sec-badge" id="keysBadge">No keys</span></button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── Advanced typography modal ──────────────── -->
+<div class="modal-overlay" id="advModal" role="dialog">
+  <div class="modal-card">
+    <div class="modal-title"><span>Typography &amp; Layout</span><button class="modal-close" id="closeAdvModal">Close ×</button></div>
+    <div class="modal-sec"><h3>Line Height</h3>
+      <div class="segmented" id="lhCtrl"><button data-value="tight">Tight</button><button data-value="normal" class="active">Normal</button><button data-value="loose">Loose</button></div></div>
+    <div class="modal-sec"><h3>Reading Width</h3>
+      <div class="segmented" id="rwCtrl"><button data-value="narrow">Narrow</button><button data-value="normal" class="active">Normal</button><button data-value="wide">Wide</button></div></div>
+    <div class="modal-sec"><h3>Text Alignment</h3>
+      <div class="segmented" id="alignCtrl"><button data-value="justify" class="active">Justified</button><button data-value="left">Ragged Right</button></div></div>
+    <div class="modal-sec"><h3>Paragraph Spacing</h3>
+      <div class="segmented" id="parSpCtrl"><button data-value="compact">Compact</button><button data-value="normal" class="active">Normal</button><button data-value="spacious">Spacious</button></div></div>
+  </div>
+</div>
+
+<!-- ── API keys modal ──────────────────────────── -->
+<div class="modal-overlay" id="keysModal" role="dialog">
+  <div class="modal-card">
+    <div class="modal-title"><span>Translation Keys</span><button class="modal-close" id="closeKeysModal">Close ×</button></div>
+    <div class="modal-sec">
+      <h3>ESV — English Standard Version</h3>
+      <p class="modal-note">Free key from Crossway. It looks like: <code style="font-family:monospace;font-size:.8em">abc12def34</code></p>
+      <div class="key-wrap"><input type="password" class="key-input" id="esvKeyInput" placeholder="Paste ESV key…" autocomplete="off" spellcheck="false"><button class="key-save" id="esvKeySave">Save</button></div>
+      <div class="key-status" id="esvKeyStatus"></div>
+      <a href="https://api.esv.org/account/create-application/" target="_blank" rel="noopener" class="key-link">↗ Get a free key at api.esv.org</a>
+    </div>
+    <hr class="key-divider">
+    <div class="modal-sec">
+      <h3>NIV, NLT, NASB &amp; 50+ More</h3>
+      <p class="modal-note">Via API.Bible — one key covers everything. Keys look like: <code style="font-family:monospace;font-size:.8em">t-AbCdEfGhIjKlM</code></p>
+      <div class="key-wrap"><input type="password" class="key-input" id="apiBibleKeyInput" placeholder="Paste API.Bible key…" autocomplete="off" spellcheck="false"><button class="key-save" id="apiBibleKeySave">Save</button></div>
+      <div class="key-status" id="apiBibleKeyStatus"></div>
+      <a href="https://scripture.api.bible" target="_blank" rel="noopener" class="key-link">↗ Get a free key at scripture.api.bible</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Search overlay ──────────────────────────── -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <span class="search-icon-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+      <input type="search" class="search-input" id="searchInput" placeholder="Search…" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="search-close-btn" id="searchClose">Close</button>
+  </div>
+  <div class="search-hint" id="searchHint"></div>
+  <div class="search-results" id="searchResults"><div class="sr-empty">Type to search</div></div>
+</div>
+
+<!-- ── Bookmarks modal ─────────────────────────── -->
+<div class="modal-overlay" id="bookmarksModal" role="dialog">
+  <div class="modal-card wide">
+    <div class="modal-title"><span>Bookmarks</span><button class="modal-close" id="closeBookmarksModal">Close ×</button></div>
+    <div id="bookmarksList"></div>
+  </div>
+</div>
+
+<!-- ── Reading plan modal ──────────────────────── -->
+<div class="modal-overlay" id="planModal" role="dialog">
+  <div class="modal-card wide">
+    <div class="modal-title"><span>Reading Plans</span><button class="modal-close" id="closePlanModal">Close ×</button></div>
+    <div class="plan-tabs" id="planTabs"></div>
+    <div id="planContent"></div>
+  </div>
+</div>
+
+<!-- ── Book/chapter selector ───────────────────── -->
+<div class="selector-overlay" id="selectorOverlay" role="dialog">
+  <button class="sel-close" id="selectorClose">Close ×</button>
+  <div class="selector-inner" id="selectorStage"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// PERSONAL CONFIG
+// ════════════════════════════════════════════════════
+const CONFIG = {
+  esvKey:      '',
+  apiBibleKey: '',
+};
+
+// ══════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════
+const BOOKS = {
+  old:[
+    ['Genesis',50],['Exodus',40],['Leviticus',27],['Numbers',36],['Deuteronomy',34],
+    ['Joshua',24],['Judges',21],['Ruth',4],['1 Samuel',31],['2 Samuel',24],
+    ['1 Kings',22],['2 Kings',25],['1 Chronicles',29],['2 Chronicles',36],
+    ['Ezra',10],['Nehemiah',13],['Esther',10],['Job',42],['Psalms',150],
+    ['Proverbs',31],['Ecclesiastes',12],['Song of Solomon',8],['Isaiah',66],
+    ['Jeremiah',52],['Lamentations',5],['Ezekiel',48],['Daniel',12],
+    ['Hosea',14],['Joel',3],['Amos',9],['Obadiah',1],['Jonah',4],['Micah',7],
+    ['Nahum',3],['Habakkuk',3],['Zephaniah',3],['Haggai',2],['Zechariah',14],['Malachi',4]
+  ],
+  new:[
+    ['Matthew',28],['Mark',16],['Luke',24],['John',21],['Acts',28],
+    ['Romans',16],['1 Corinthians',16],['2 Corinthians',13],['Galatians',6],
+    ['Ephesians',6],['Philippians',4],['Colossians',4],['1 Thessalonians',5],
+    ['2 Thessalonians',3],['1 Timothy',6],['2 Timothy',4],['Titus',3],
+    ['Philemon',1],['Hebrews',13],['James',5],['1 Peter',5],['2 Peter',3],
+    ['1 John',5],['2 John',1],['3 John',1],['Jude',1],['Revelation',22]
+  ]
+};
+const ALL_BOOKS=[...BOOKS.old,...BOOKS.new];
+
+const OSIS={
+  'Genesis':'GEN','Exodus':'EXO','Leviticus':'LEV','Numbers':'NUM','Deuteronomy':'DEU',
+  'Joshua':'JOS','Judges':'JDG','Ruth':'RUT','1 Samuel':'1SA','2 Samuel':'2SA',
+  '1 Kings':'1KI','2 Kings':'2KI','1 Chronicles':'1CH','2 Chronicles':'2CH',
+  'Ezra':'EZR','Nehemiah':'NEH','Esther':'EST','Job':'JOB','Psalms':'PSA',
+  'Proverbs':'PRO','Ecclesiastes':'ECC','Song of Solomon':'SNG','Isaiah':'ISA',
+  'Jeremiah':'JER','Lamentations':'LAM','Ezekiel':'EZK','Daniel':'DAN',
+  'Hosea':'HOS','Joel':'JOL','Amos':'AMO','Obadiah':'OBA','Jonah':'JON',
+  'Micah':'MIC','Nahum':'NAM','Habakkuk':'HAB','Zephaniah':'ZEP','Haggai':'HAG',
+  'Zechariah':'ZEC','Malachi':'MAL','Matthew':'MAT','Mark':'MRK','Luke':'LUK',
+  'John':'JHN','Acts':'ACT','Romans':'ROM','1 Corinthians':'1CO','2 Corinthians':'2CO',
+  'Galatians':'GAL','Ephesians':'EPH','Philippians':'PHP','Colossians':'COL',
+  '1 Thessalonians':'1TH','2 Thessalonians':'2TH','1 Timothy':'1TI','2 Timothy':'2TI',
+  'Titus':'TIT','Philemon':'PHM','Hebrews':'HEB','James':'JAS','1 Peter':'1PE',
+  '2 Peter':'2PE','1 John':'1JN','2 John':'2JN','3 John':'3JN','Jude':'JUD','Revelation':'REV'
+};
+const FREE=[
+  {spec:'ba:web',name:'World English Bible',short:'WEB'},
+  {spec:'ba:kjv',name:'King James Version (1769)',short:'KJV'},
+  {spec:'ba:webbe',name:'WEB British Edition',short:'WEBBE'},
+  {spec:'ba:oeb-us',name:'Open English Bible (US)',short:'OEB'},
+  {spec:'ba:bbe',name:'Bible in Basic English',short:'BBE'},
+  {spec:'ba:clementine',name:'Clementine Vulgate',short:'VUL'}
+];
+const PRIORITY=['NIV','ESV','NLT','NASB','NASB2020','CSB','NKJV','NET','MSG','AMP','GNT','NCV','NRSV','CEB','CEV'];
+
+// ══════════════════════════════════════════════════
+// STATE PERSISTENCE
+// ══════════════════════════════════════════════════
+function loadPersisted(){
+  try{ return JSON.parse(localStorage.getItem('lectio-state')||'{}'); }catch(e){return{};}
+}
+function persist(){
+  const k={book:S.book,chapter:S.chapter,translation1:S.translation1,showVerseNums:S.showVerseNums,
+    showChHead:S.showChHead,showDropCap:S.showDropCap,flowingProse:S.flowingProse,
+    theme:S.theme,size:S.size,lineHeight:S.lineHeight,readWidth:S.readWidth,
+    textAlign:S.textAlign,parSpacing:S.parSpacing};
+  localStorage.setItem('lectio-state',JSON.stringify(k));
+}
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+const _p=loadPersisted();
+const S={
+  book:         _p.book||'John',
+  chapter:      _p.chapter||1,
+  translation1: _p.translation1||'ba:web',
+  comparedSpecs:[],
+  showVerseNums:_p.showVerseNums??false,
+  showChHead:   _p.showChHead??true,
+  showDropCap:  _p.showDropCap??true,
+  flowingProse: _p.flowingProse??true,
+  theme:        _p.theme||'paper',
+  size:         _p.size||'medium',
+  lineHeight:   _p.lineHeight||'normal',
+  readWidth:    _p.readWidth||'normal',
+  textAlign:    _p.textAlign||'justify',
+  parSpacing:   _p.parSpacing||'normal',
+  apiKey:       CONFIG.apiBibleKey,
+  apiBibles:    [],
+  esvApiKey:    CONFIG.esvKey,
+  bookmarks:    [],
+  cache:        new Map()
+};
+
+// ══════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════
+async function fetchBibleApi(book,ch,id){
+  const k=`ba:${id}|${book}|${ch}`;
+  if(S.cache.has(k))return S.cache.get(k);
+  const r=await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}?translation=${id}`);
+  if(!r.ok)throw new Error(`Could not load (${r.status})`);
+  const d=await r.json();S.cache.set(k,d);return d;
+}
+async function fetchApiBibleCh(bibleId,book,ch){
+  const k=`ab:${bibleId}|${book}|${ch}`;
+  if(S.cache.has(k))return S.cache.get(k);
+  const osis=OSIS[book];if(!osis)throw new Error('Unknown book: '+book);
+  const url=`https://rest.api.bible/v1/bibles/${bibleId}/chapters/${osis}.${ch}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
+  const r=await fetch(url,{headers:{'api-key':S.apiKey}});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`API.Bible error (${r.status})`);}
+  const d=await r.json();S.cache.set(k,d);return d;
+}
+function parseEsvVerses(text){
+  const vs=[];const parts=text.replace(/\s+/g,' ').split(/\[(\d+)\]/);
+  for(let i=1;i<parts.length;i+=2){
+    const t=(parts[i+1]||'').trim().replace(/\s*\(ESV\)\s*$/,'').trim();
+    if(t)vs.push({verse:parseInt(parts[i]),text:t});
+  }
+  return vs;
+}
+async function fetchEsv(book,ch){
+  const k=`esv|${book}|${ch}`;if(S.cache.has(k))return S.cache.get(k);
+  const q=encodeURIComponent(`${book} ${ch}`);
+  const url=`https://api.esv.org/v3/passage/text/?q=${q}&include-verse-numbers=true&include-footnotes=false&include-headings=false&include-chapter-numbers=false&include-short-copyright=false&indent-paragraphs=false&indent-poetry=false&include-passage-references=false`;
+  const r=await fetch(url,{headers:{Authorization:`Token ${S.esvApiKey}`}});
+  if(!r.ok)throw new Error(`ESV error (${r.status})`);
+  const raw=await r.json();
+  const d={verses:parseEsvVerses((raw.passages||[])[0]||''),copyright:'The Holy Bible, English Standard Version® © 2001 Crossway'};
+  S.cache.set(k,d);return d;
+}
+async function loadApiBibles(key){
+  const r=await fetch('https://rest.api.bible/v1/bibles?language=eng',{headers:{'api-key':key}});
+  if(!r.ok)throw new Error(`Invalid key (${r.status})`);
+  return(await r.json()).data||[];
+}
+async function fetchPassage(book,ch,spec){
+  const[src,...rest]=spec.split(':');const id=rest.join(':');
+  if(src==='ba')return fetchBibleApi(book,ch,id);
+  if(src==='ab')return fetchApiBibleCh(id,book,ch);
+  if(src==='esv')return fetchEsv(book,ch);
+  throw new Error('Unknown source: '+spec);
+}
+
+// ══════════════════════════════════════════════════
+// TRANSLATION HELPERS
+// ══════════════════════════════════════════════════
+function translLabel(spec){
+  if(spec==='esv:esv')return'ESV';
+  const f=FREE.find(t=>t.spec===spec);if(f)return f.short;
+  const[,...r]=spec.split(':');const id=r.join(':');
+  const ab=S.apiBibles.find(b=>b.id===id);
+  return ab?(ab.abbreviationLocal||ab.abbreviation||id):id;
+}
+function getAllTranslations(){
+  return[...FREE,
+    ...(S.esvApiKey?[{spec:'esv:esv',name:'English Standard Version',short:'ESV'}]:[]),
+    ...S.apiBibles.map(b=>({spec:`ab:${b.id}`,name:b.nameLocal||b.name||b.id,short:b.abbreviation||''}))
+  ];
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// ══════════════════════════════════════════════════
+// RENDERING
+// ══════════════════════════════════════════════════
+function extractApiBibleVerses(html){
+  const tmp=document.createElement('div');tmp.innerHTML=html;
+  const result=[];let cur=null;
+  function walk(n){
+    if(n.nodeType===Node.ELEMENT_NODE){
+      const cls=n.className||'';
+      if(/\b(s1|s2|ms|mr|note|fr|ft|rq|x)\b/.test(cls))return;
+      if(n.hasAttribute('data-number')){if(cur)result.push(cur);cur={num:parseInt(n.getAttribute('data-number'),10),text:''};return;}
+      n.childNodes.forEach(walk);
+    }else if(n.nodeType===Node.TEXT_NODE&&cur)cur.text+=n.textContent;
+  }
+  tmp.childNodes.forEach(walk);if(cur)result.push(cur);
+  return result.map(v=>({...v,text:v.text.replace(/\s+/g,' ').trim()}));
+}
+
+function buildText(data,spec,isCol){
+  const[src]=spec.split(':');let html='';
+  if(isCol){
+    html+=`<div class="col-header"><span class="col-ref">${esc(S.book)} ${S.chapter}</span><span class="col-name">${esc(translLabel(spec))}</span></div>`;
+  }else if(S.showChHead){
+    html+=`<div class="chapter-meta"><span class="meta-book">${esc(S.book)}</span><span class="meta-numeral">${S.chapter}</span><div class="meta-rule"></div></div>`;
+  }
+  const drop=S.showDropCap&&!isCol;
+  if(src==='ba'||src==='esv'){
+    const vs=data.verses||[];
+    if(S.flowingProse){
+      let body='';
+      vs.forEach((v,i)=>{
+        const n=S.showVerseNums?`<sup class="verse-num">${v.verse}</sup>`:'';
+        body+=(i>0?' ':'')+n+esc(v.text.replace(/\s+/g,' ').trim());
+      });
+      html+=`<p class="passage${drop?' drop-cap':''}">${body}</p>`;
+    }else{
+      vs.forEach(v=>{
+        const n=S.showVerseNums?`<sup class="verse-num">${v.verse}</sup>`:'';
+        const txt=esc(v.text.trim());
+        html+=`<p class="verse-line" data-v="${v.verse}" data-txt="${v.text.trim().replace(/"/g,'&quot;')}">${n}${txt}</p>`;
+      });
+    }
+    if(data.copyright)html+=`<div class="copyright">${esc(data.copyright)}</div>`;
+  }else{
+    const raw=data.data?.content||'';
+    const cr=data.data?.copyright?data.data.copyright.replace(/<[^>]+>/g,''):'';
+    if(!S.flowingProse){
+      const vs=extractApiBibleVerses(raw);
+      if(vs.length>0){
+        vs.forEach(v=>{
+          const n=S.showVerseNums?`<sup class="verse-num">${v.num}</sup>`:'';
+          html+=`<p class="verse-line" data-v="${v.num}" data-txt="${v.text.replace(/"/g,'&quot;')}">${n}${esc(v.text)}</p>`;
+        });
+      }else html+=`<div class="apibible-content">${raw}</div>`;
+    }else{
+      html+=`<div class="${drop?'apibible-drop ':''}apibible-prose"><div class="apibible-content">${raw}</div></div>`;
+    }
+    if(cr)html+=`<div class="copyright">${esc(cr)}</div>`;
+  }
+  return html;
+}
+
+function applyBodyAttrs(){
+  document.body.dataset.theme  =S.theme;
+  document.body.dataset.size   =S.size;
+  document.body.dataset.lh     =S.lineHeight;
+  document.body.dataset.rw     =S.readWidth;
+  document.body.dataset.align  =S.textAlign;
+  document.body.dataset.parsp  =S.parSpacing;
+}
+
+async function render(scrollToTop=false){
+  const surf=document.getElementById('readingSurface');
+  document.getElementById('topBook').textContent=S.book.toUpperCase();
+  document.getElementById('topCh').textContent=S.chapter;
+  applyBodyAttrs();
+  surf.classList.add('loading');
+  const allSpecs=[S.translation1,...S.comparedSpecs];
+  const comparing=allSpecs.length>1;
+  try{
+    const results=await Promise.all(allSpecs.map(sp=>fetchPassage(S.book,S.chapter,sp)));
+    if(comparing){
+      surf.className='reading-surface compare-grid';
+      surf.classList.toggle('hide-verse-nums',!S.showVerseNums);
+      surf.innerHTML=results.map((d,i)=>`<div class="compare-col">${buildText(d,allSpecs[i],true)}</div>`).join('');
+    }else{
+      surf.className='reading-surface';
+      surf.classList.toggle('hide-verse-nums',!S.showVerseNums);
+      surf.innerHTML=buildText(results[0],S.translation1,false);
+    }
+    injectVerseStars();
+    document.getElementById('pageNav').style.display='flex';
+    updateNav();
+    persist();
+  }catch(err){
+    surf.className='reading-surface';
+    surf.innerHTML=`<div class="status-msg">${esc(err.message)}</div>`;
+  }finally{
+    surf.classList.remove('loading');
+    if(scrollToTop)window.scrollTo({top:0,behavior:'instant'});
+  }
+}
+
+function updateNav(){
+  const idx=ALL_BOOKS.findIndex(b=>b[0]===S.book);
+  document.getElementById('prevBtn').disabled=(idx===0&&S.chapter===1);
+  document.getElementById('nextBtn').disabled=(idx===ALL_BOOKS.length-1&&S.chapter===ALL_BOOKS[idx][1]);
+}
+function step(dir){
+  const idx=ALL_BOOKS.findIndex(b=>b[0]===S.book);
+  const max=ALL_BOOKS[idx][1];
+  if(dir>0){if(S.chapter<max)S.chapter++;else if(idx<ALL_BOOKS.length-1){S.book=ALL_BOOKS[idx+1][0];S.chapter=1;}else return;}
+  else{if(S.chapter>1)S.chapter--;else if(idx>0){S.book=ALL_BOOKS[idx-1][0];S.chapter=ALL_BOOKS[idx-1][1];}else return;}
+  render(true);
+}
+
+// ══════════════════════════════════════════════════
+// BOOKMARKS
+// ══════════════════════════════════════════════════
+function loadBookmarks(){
+  try{return JSON.parse(localStorage.getItem('lectio-bookmarks')||'[]');}catch(e){return[];}
+}
+function saveBookmarks(){localStorage.setItem('lectio-bookmarks',JSON.stringify(S.bookmarks));}
+
+function toggleBookmark(verseEl){
+  const v=parseInt(verseEl.dataset.v,10);
+  const txt=(verseEl.dataset.txt||'').trim();
+  const existing=S.bookmarks.findIndex(b=>b.book===S.book&&b.ch===S.chapter&&b.v===v);
+  if(existing>-1){
+    S.bookmarks.splice(existing,1);
+    showToast('Bookmark removed');
+  }else{
+    S.bookmarks.unshift({id:Date.now().toString(36),book:S.book,ch:S.chapter,v,text:txt,tl:translLabel(S.translation1),date:new Date().toLocaleDateString()});
+    showToast('Bookmarked');
+  }
+  saveBookmarks();
+  injectVerseStars();
+  document.getElementById('bookmarksBtn').classList.toggle('active',S.bookmarks.length>0);
+}
+
+function injectVerseStars(){
+  document.querySelectorAll('.verse-line[data-v]').forEach(p=>{
+    const v=parseInt(p.dataset.v,10);
+    const isBookmarked=S.bookmarks.some(b=>b.book===S.book&&b.ch===S.chapter&&b.v===v);
+    const star=document.createElement('button');
+    star.className='v-star'+(isBookmarked?' on':'');
+    star.textContent=isBookmarked?'★':'☆';
+    star.title=isBookmarked?'Remove bookmark':'Bookmark verse';
+    star.addEventListener('click',e=>{e.stopPropagation();toggleBookmark(p);});
+    p.appendChild(star);
+  });
+}
+
+function renderBookmarksModal(){
+  const list=document.getElementById('bookmarksList');
+  if(S.bookmarks.length===0){list.innerHTML='<div class="bk-empty">No bookmarks yet</div>';return;}
+  list.innerHTML=S.bookmarks.map(b=>`
+    <div class="bk-item" data-book="${esc(b.book)}" data-ch="${b.ch}">
+      <div class="bk-info">
+        <div class="bk-ref">${esc(b.book)} ${b.ch}:${b.v} &nbsp;·&nbsp; ${esc(b.tl)} &nbsp;·&nbsp; ${esc(b.date)}</div>
+        <div class="bk-text">${esc(b.text||'—')}</div>
+      </div>
+      <button class="bk-del" data-id="${b.id}" title="Remove">×</button>
+    </div>`).join('');
+  list.querySelectorAll('.bk-item').forEach(el=>{
+    el.querySelector('.bk-info').addEventListener('click',()=>{
+      S.book=el.dataset.book;S.chapter=parseInt(el.dataset.ch,10);
+      closeAll();render(true);
+    });
+  });
+  list.querySelectorAll('.bk-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      S.bookmarks=S.bookmarks.filter(b=>b.id!==btn.dataset.id);
+      saveBookmarks();renderBookmarksModal();
+      document.getElementById('bookmarksBtn').classList.toggle('active',S.bookmarks.length>0);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+// CONTEXT MENU (right-click / long-press)
+// ══════════════════════════════════════════════════
+let ctxTarget=null,longPressTimer=null,touchMoved=false;
+
+function showCtx(x,y,verseEl){
+  ctxTarget=verseEl;
+  const menu=document.getElementById('ctxMenu');
+  const isBookmarked=S.bookmarks.some(b=>b.book===S.book&&b.ch===S.chapter&&b.v==verseEl.dataset.v);
+  document.getElementById('ctxBookmark').textContent=isBookmarked?'Remove bookmark':'Bookmark verse';
+  menu.style.left=Math.min(x,window.innerWidth-160)+'px';
+  menu.style.top=Math.min(y,window.innerHeight-90)+'px';
+  menu.classList.add('open');
+}
+function hideCtx(){document.getElementById('ctxMenu').classList.remove('open');ctxTarget=null;}
+
+// ══════════════════════════════════════════════════
+// COPY + TOAST
+// ══════════════════════════════════════════════════
+function copyVerse(verseEl){
+  if(!verseEl)return;
+  const txt=(verseEl.dataset.txt||'').trim();
+  const v=verseEl.dataset.v;
+  const ref=`${S.book} ${S.chapter}:${v}`;
+  const tl=translLabel(S.translation1);
+  const full=`"${txt}" — ${ref} (${tl})`;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(full).then(()=>showToast('Copied!')).catch(()=>fallbackCopy(full));
+  }else{
+    fallbackCopy(full);
+  }
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');showToast('Copied!');}
+  catch(e){showToast('Select & copy manually');}
+  document.body.removeChild(ta);
+}
+
+let toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+// ══════════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════════
+let searchTimer=null;
+
+function parseRef(refStr){
+  if(!refStr)return null;
+  for(const[name]of ALL_BOOKS){
+    if(refStr.startsWith(name)){
+      const rest=refStr.slice(name.length).trim();
+      const m=rest.match(/^(\d+):(\d+)/);
+      if(m)return{book:name,ch:parseInt(m[1]),v:parseInt(m[2])};
+    }
+  }
+  return null;
+}
+
+async function doSearch(query){
+  const hint=document.getElementById('searchHint');
+  const results=document.getElementById('searchResults');
+  results.innerHTML='<div class="sr-empty">Searching…</div>';
+  const spec=S.translation1;
+  const[src,...rest]=spec.split(':');const id=rest.join(':');
+  try{
+    let items=[];
+    if(src==='esv'&&S.esvApiKey){
+      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
+      if(!r.ok)throw new Error(`ESV search failed (${r.status})`);
+      const data=await r.json();
+      items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
+      hint.textContent=`${data.total_results||0} results in ESV`;
+    }else if(src==='ab'&&S.apiKey){
+      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
+      if(!r.ok)throw new Error(`Search failed (${r.status})`);
+      const data=await r.json();
+      items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
+      hint.textContent=`${data.data?.total||'?'} results in ${translLabel(spec)}`;
+    }else{
+      results.innerHTML='<div class="sr-empty">Search requires an ESV or API.Bible translation. Switch your primary translation and try again.</div>';
+      hint.textContent='';return;
+    }
+    if(!items.length){results.innerHTML='<div class="sr-empty">No results found</div>';return;}
+    results.innerHTML=items.map(it=>`
+      <div class="sr-item" data-ref="${esc(it.ref)}">
+        <div class="sr-ref">${esc(it.ref)}</div>
+        <div class="sr-text">${esc(it.text.slice(0,180)+(it.text.length>180?'…':''))}</div>
+      </div>`).join('');
+    results.querySelectorAll('.sr-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const parsed=parseRef(el.dataset.ref);
+        if(parsed){S.book=parsed.book;S.chapter=parsed.ch;closeAll();render(true);}
+      });
+    });
+  }catch(err){
+    results.innerHTML=`<div class="sr-empty">${esc(err.message)}</div>`;
+    hint.textContent='';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// READING PLANS
+// ══════════════════════════════════════════════════
+const PLAN_DEFS=[
+  {id:'sequential',label:'Bible in a Year',days:365},
+  {id:'nt90',label:'NT in 90 Days',days:90},
+  {id:'psalms30',label:'Psalms in 30 Days',days:30}
+];
+
+function buildPlanChapters(planId){
+  if(planId==='sequential'){
+    const chs=[];ALL_BOOKS.forEach(([b,n])=>{for(let c=1;c<=n;c++)chs.push({book:b,ch:c});});return chs;
+  }
+  if(planId==='nt90'){
+    const chs=[];
+    BOOKS.new.forEach(([b,n])=>{for(let c=1;c<=n;c++)chs.push({book:b,ch:c});});
+    for(let c=1;c<=150;c++)chs.push({book:'Psalms',ch:c});
+    return chs;
+  }
+  if(planId==='psalms30'){
+    const chs=[];for(let c=1;c<=150;c++)chs.push({book:'Psalms',ch:c});return chs;
+  }
+  return[];
+}
+
+function getTodaysReading(planId){
+  const def=PLAN_DEFS.find(p=>p.id===planId);if(!def)return[];
+  const chs=buildPlanChapters(planId);
+  const total=chs.length;
+  const startKey=`lectio-planstart-${planId}`;
+  let startDate=localStorage.getItem(startKey);
+  if(!startDate){startDate=new Date().toISOString().split('T')[0];localStorage.setItem(startKey,startDate);}
+  const daysDiff=Math.floor((Date.now()-new Date(startDate).getTime())/86400000);
+  const dayIdx=Math.min(daysDiff,def.days-1);
+  const start=Math.floor(dayIdx*total/def.days);
+  const end=Math.floor((dayIdx+1)*total/def.days);
+  return{day:dayIdx+1,maxDay:def.days,passages:chs.slice(start,end),progress:Math.round((dayIdx+1)/def.days*100)};
+}
+
+function resetPlan(planId){
+  localStorage.setItem(`lectio-planstart-${planId}`,new Date().toISOString().split('T')[0]);
+  renderPlanContent(planId);
+}
+
+let activePlan=localStorage.getItem('lectio-active-plan')||'sequential';
+
+function renderPlanContent(planId){
+  activePlan=planId;localStorage.setItem('lectio-active-plan',planId);
+  const content=document.getElementById('planContent');
+  const reading=getTodaysReading(planId);
+  const passageHTML=reading.passages.map(p=>`
+    <div class="plan-passage" data-book="${esc(p.book)}" data-ch="${p.ch}">
+      <span class="plan-passage-ref">${esc(p.book)} ${p.ch}</span>
+      <span class="plan-passage-go">Read →</span>
+    </div>`).join('');
+  content.innerHTML=`
+    <div class="plan-day">Day ${reading.day} of ${reading.maxDay}</div>
+    ${passageHTML}
+    <div class="plan-progress">
+      <div class="plan-progress-label">${reading.progress}% complete</div>
+      <div class="plan-progress-bar"><div class="plan-progress-fill" style="width:${reading.progress}%"></div></div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="open-sec-btn" id="resetPlanBtn" style="font-size:.72rem;">Reset plan to today</button>
+    </div>`;
+  content.querySelectorAll('.plan-passage').forEach(el=>{
+    el.addEventListener('click',()=>{S.book=el.dataset.book;S.chapter=parseInt(el.dataset.ch,10);closeAll();render(true);});
+  });
+  document.getElementById('resetPlanBtn').addEventListener('click',()=>resetPlan(planId));
+}
+
+function openPlanModal(){
+  const tabs=document.getElementById('planTabs');
+  tabs.innerHTML=PLAN_DEFS.map(p=>`<button class="plan-tab${p.id===activePlan?' active':''}" data-plan="${p.id}">${p.label}</button>`).join('');
+  tabs.querySelectorAll('.plan-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      tabs.querySelectorAll('.plan-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');renderPlanContent(btn.dataset.plan);
+    });
+  });
+  renderPlanContent(activePlan);
+  document.getElementById('planModal').classList.add('open');
+}
+
+// ══════════════════════════════════════════════════
+// TRANSLATION SELECTS
+// ══════════════════════════════════════════════════
+function buildSelect(){
+  const freeOpts=FREE.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('');
+  const esvOpt=S.esvApiKey?`<optgroup label="── ESV (Crossway) ──"><option value="esv:esv">English Standard Version (ESV)</option></optgroup>`:'';
+  let abOpts='';
+  if(S.apiBibles.length>0){
+    const pri=[],rest=[];
+    S.apiBibles.forEach(b=>{PRIORITY.includes((b.abbreviation||'').toUpperCase())?pri.push(b):rest.push(b);});
+    pri.sort((a,b)=>PRIORITY.indexOf(a.abbreviation.toUpperCase())-PRIORITY.indexOf(b.abbreviation.toUpperCase()));
+    rest.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    abOpts=`<optgroup label="── Modern (API.Bible) ──">${[...pri,...rest].map(b=>`<option value="ab:${b.id}">${b.nameLocal||b.name}</option>`).join('')}</optgroup>`;
+  }else{
+    abOpts=`<option disabled>── Add keys to unlock NIV, NLT… ──</option>`;
+  }
+  const html=`<optgroup label="── Public Domain ──">${freeOpts}</optgroup>${esvOpt}${abOpts}`;
+  const sel=document.getElementById('translation1Select');
+  sel.innerHTML=html;sel.value=S.translation1;
+  if(!sel.value){sel.selectedIndex=0;S.translation1=FREE[0].spec;}
+}
+function updateKeysBadge(){
+  const n=(S.esvApiKey?1:0)+(S.apiBibles.length>0?1:0);
+  document.getElementById('keysBadge').textContent=n===0?'No keys':n===1?'1 key':'2 keys';
+}
+
+// ══════════════════════════════════════════════════
+// COMPARISON CHIPS + TYPEAHEAD
+// ══════════════════════════════════════════════════
+function renderChips(){
+  const wrap=document.getElementById('compChips');
+  if(S.comparedSpecs.length===0){wrap.innerHTML='<span class="comp-empty">None — search below</span>';return;}
+  wrap.innerHTML=S.comparedSpecs.map(sp=>`<div class="comp-chip"><span>${esc(translLabel(sp))}</span><button class="chip-x" data-spec="${sp}">×</button></div>`).join('');
+  wrap.querySelectorAll('.chip-x').forEach(btn=>{
+    btn.addEventListener('click',()=>{S.comparedSpecs=S.comparedSpecs.filter(s=>s!==btn.dataset.spec);renderChips();render();});
+  });
+}
+function positionDropdown(){
+  const dd=document.getElementById('compDropdown');
+  const input=document.getElementById('compInput');
+  const r=input.getBoundingClientRect();
+  dd.style.top=(r.bottom+3)+'px';
+  dd.style.left=r.left+'px';
+  dd.style.width=r.width+'px';
+}
+
+function renderDropdown(q){
+  const dd=document.getElementById('compDropdown');
+  const all=getAllTranslations();
+  const lq=q.toLowerCase().trim();
+  const res=(lq?all.filter(t=>(t.name||'').toLowerCase().includes(lq)||(t.short||'').toLowerCase().includes(lq)):all).slice(0,10);
+  positionDropdown();
+  if(!res.length){dd.innerHTML='<div class="comp-opt" style="pointer-events:none;opacity:.4">No results</div>';dd.classList.add('open');return;}
+  dd.innerHTML=res.map(t=>{
+    const added=S.comparedSpecs.includes(t.spec)||t.spec===S.translation1;
+    return`<div class="comp-opt${added?' added':''}" data-spec="${t.spec}"><span>${esc(t.name)}</span><span class="comp-opt-abbr">${esc(t.short||'')}</span></div>`;
+  }).join('');
+  dd.classList.add('open');
+  dd.querySelectorAll('.comp-opt:not(.added)').forEach(el=>{
+    const pick=e=>{
+      e.preventDefault();S.comparedSpecs.push(el.dataset.spec);
+      document.getElementById('compInput').value='';dd.classList.remove('open');
+      renderChips();render();
+    };
+    el.addEventListener('mousedown',pick);
+    el.addEventListener('touchend',pick,{passive:false});
+  });
+}
+
+// ══════════════════════════════════════════════════
+// SETTINGS CONTROLS
+// ══════════════════════════════════════════════════
+function initToggle(id,key){
+  const el=document.getElementById(id);
+  if(S[key])el.classList.add('on');
+  el.addEventListener('click',()=>{S[key]=!S[key];el.classList.toggle('on');render();});
+}
+function initSeg(id,key,cb){
+  document.getElementById(id).querySelectorAll('button').forEach(btn=>{
+    if(btn.dataset.value===String(S[key]))btn.classList.add('active');else btn.classList.remove('active');
+    btn.addEventListener('click',()=>{
+      document.getElementById(id).querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');S[key]=btn.dataset.value;
+      if(cb)cb(S[key]);persist();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+// API KEY SAVING
+// ══════════════════════════════════════════════════
+async function saveEsvKey(){
+  const key=document.getElementById('esvKeyInput').value.trim();
+  const st=document.getElementById('esvKeyStatus');
+  if(!key){st.textContent='Enter a key first.';st.className='key-status err';return;}
+  st.textContent='Checking…';st.className='key-status';
+  try{
+    const r=await fetch('https://api.esv.org/v3/passage/text/?q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false',{headers:{Authorization:`Token ${key}`}});
+    if(!r.ok)throw new Error(`Rejected (${r.status})`);
+    S.esvApiKey=key;buildSelect();updateKeysBadge();renderChips();
+    st.textContent='✓ ESV connected';st.className='key-status ok';
+  }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
+}
+async function saveApiBibleKey(){
+  const key=document.getElementById('apiBibleKeyInput').value.trim();
+  const st=document.getElementById('apiBibleKeyStatus');
+  if(!key){st.textContent='Enter a key first.';st.className='key-status err';return;}
+  st.textContent='Checking…';st.className='key-status';
+  try{
+    const bibles=await loadApiBibles(key);
+    S.apiKey=key;S.apiBibles=bibles;buildSelect();updateKeysBadge();renderChips();
+    st.textContent=`✓ Connected — ${bibles.length} translations`;st.className='key-status ok';
+  }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
+}
+
+// ══════════════════════════════════════════════════
+// BOOK / CHAPTER SELECTOR
+// ══════════════════════════════════════════════════
+let selMode='books',selBook=null;
+function openSelector(){selMode='books';document.getElementById('selectorOverlay').classList.add('open');renderSelector();}
+function closeSelector(){document.getElementById('selectorOverlay').classList.remove('open');}
+function renderSelector(){
+  const stage=document.getElementById('selectorStage');
+  if(selMode==='books'){
+    stage.innerHTML=`<div class="testament-lbl">Old Testament</div><div class="book-grid">${BOOKS.old.map(([n])=>`<button class="book-btn${n===S.book?' active':''}" data-book="${n}">${n}</button>`).join('')}</div><div class="testament-lbl">New Testament</div><div class="book-grid">${BOOKS.new.map(([n])=>`<button class="book-btn${n===S.book?' active':''}" data-book="${n}">${n}</button>`).join('')}</div>`;
+    stage.querySelectorAll('.book-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        selBook=btn.dataset.book;
+        const meta=ALL_BOOKS.find(b=>b[0]===selBook);
+        if(meta[1]===1){S.book=selBook;S.chapter=1;closeSelector();render(true);}
+        else{selMode='chapters';renderSelector();}
+      });
+    });
+  }else{
+    const meta=ALL_BOOKS.find(b=>b[0]===selBook);
+    stage.innerHTML=`<button class="ch-back" id="chBack">← Books</button><div class="sel-book-title">${selBook}</div><div class="ch-grid">${Array.from({length:meta[1]},(_,i)=>`<button class="ch-btn" data-ch="${i+1}">${i+1}</button>`).join('')}</div>`;
+    document.getElementById('chBack').addEventListener('click',()=>{selMode='books';renderSelector();});
+    stage.querySelectorAll('.ch-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{S.book=selBook;S.chapter=parseInt(btn.dataset.ch,10);closeSelector();render(true);});
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════
+// UTILITY: close everything
+// ══════════════════════════════════════════════════
+function closeAll(){
+  ['settingsPanel','searchOverlay','bookmarksModal','keysModal','advModal','planModal','ctxMenu'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.classList.remove('open');}
+  });
+  closeSelector();
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
+}
+
+// ══════════════════════════════════════════════════
+// BOOTSTRAP
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',async()=>{
+  // Register service worker for PWA/offline support
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  // Generate apple-touch-icon via canvas (no external PNG file needed)
+  try{
+    const c=document.createElement('canvas');c.width=c.height=180;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#191919';
+    ctx.beginPath();ctx.roundRect(0,0,180,180,22);ctx.fill();
+    ctx.fillStyle='#FFFFFF';
+    ctx.font='italic 145px Georgia,serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('ℒ',90,97);
+    const l=document.createElement('link');
+    l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');
+    document.head.appendChild(l);
+  }catch(e){}
+
+  // Load bookmarks
+  S.bookmarks=loadBookmarks();
+  document.getElementById('bookmarksBtn').classList.toggle('active',S.bookmarks.length>0);
+
+  // Auto-load keys from CONFIG
+  if(CONFIG.apiBibleKey){
+    try{S.apiBibles=await loadApiBibles(CONFIG.apiBibleKey);document.getElementById('apiBibleKeyStatus').textContent=`✓ ${S.apiBibles.length} translations connected`;document.getElementById('apiBibleKeyStatus').className='key-status ok';}
+    catch(e){S.apiKey='';document.getElementById('apiBibleKeyStatus').textContent='✗ Pre-configured key failed';document.getElementById('apiBibleKeyStatus').className='key-status err';}
+  }
+  if(CONFIG.esvKey){document.getElementById('esvKeyStatus').textContent='✓ ESV connected';document.getElementById('esvKeyStatus').className='key-status ok';}
+
+  buildSelect();renderChips();updateKeysBadge();
+
+  // Pre-fill key inputs
+  if(CONFIG.esvKey)document.getElementById('esvKeyInput').value=CONFIG.esvKey;
+  if(CONFIG.apiBibleKey)document.getElementById('apiBibleKeyInput').value=CONFIG.apiBibleKey;
+
+  // Reflect initial toggle states correctly
+  ['versNumToggle','chHeadToggle','dropCapToggle','proseToggle'].forEach(id=>{
+    const key={versNumToggle:'showVerseNums',chHeadToggle:'showChHead',dropCapToggle:'showDropCap',proseToggle:'flowingProse'}[id];
+    const el=document.getElementById(id);
+    el.classList.toggle('on',!!S[key]);
+    el.addEventListener('click',()=>{S[key]=!S[key];el.classList.toggle('on');render();});
+  });
+
+  // Segmented controls — apply persisted values
+  function initSegPersisted(id,key,cb){
+    const grp=document.getElementById(id);
+    grp.querySelectorAll('button').forEach(btn=>{
+      btn.classList.toggle('active',btn.dataset.value===String(S[key]));
+      btn.addEventListener('click',()=>{
+        grp.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');S[key]=btn.dataset.value;
+        if(cb)cb(S[key]);else applyBodyAttrs();persist();
+      });
+    });
+  }
+  initSegPersisted('themeCtrl','theme',v=>{document.body.dataset.theme=v;});
+  initSegPersisted('sizeCtrl','size',v=>{document.body.dataset.size=v;});
+  initSegPersisted('lhCtrl','lineHeight',v=>{document.body.dataset.lh=v;});
+  initSegPersisted('rwCtrl','readWidth',v=>{document.body.dataset.rw=v;});
+  initSegPersisted('alignCtrl','textAlign',v=>{document.body.dataset.align=v;});
+  initSegPersisted('parSpCtrl','parSpacing',v=>{document.body.dataset.parsp=v;});
+
+  document.getElementById('translation1Select').addEventListener('change',e=>{S.translation1=e.target.value;render();});
+
+  // Typeahead
+  const compInput=document.getElementById('compInput');
+  const compDd=document.getElementById('compDropdown');
+  compInput.addEventListener('focus',()=>renderDropdown(compInput.value));
+  compInput.addEventListener('input',()=>renderDropdown(compInput.value));
+  compInput.addEventListener('blur',()=>setTimeout(()=>compDd.classList.remove('open'),150));
+  // Reposition dropdown when panel scrolls or window resizes
+  document.getElementById('settingsPanel').addEventListener('scroll',()=>{if(compDd.classList.contains('open'))positionDropdown();});
+  window.addEventListener('resize',()=>{if(compDd.classList.contains('open'))positionDropdown();});
+
+  // Settings panel — close excludes clicks inside modals/overlays
+  const panel=document.getElementById('settingsPanel');
+  document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
+  document.getElementById('settingsClose').addEventListener('click',()=>{panel.classList.remove('open');compDd.classList.remove('open');});
+  document.addEventListener('click',e=>{
+    if(!panel.classList.contains('open'))return;
+    if(panel.contains(e.target))return;
+    if(document.getElementById('settingsToggle').contains(e.target))return;
+    if(e.target.closest('.modal-overlay,.search-overlay,.selector-overlay,.ctx-menu,.bottom-tab-bar'))return;
+    panel.classList.remove('open');
+  });
+
+  // Search
+  document.getElementById('searchBtn').addEventListener('click',()=>{
+    document.getElementById('searchOverlay').classList.toggle('open');
+    if(document.getElementById('searchOverlay').classList.contains('open'))
+      setTimeout(()=>document.getElementById('searchInput').focus(),100);
+  });
+  document.getElementById('searchClose').addEventListener('click',()=>document.getElementById('searchOverlay').classList.remove('open'));
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    clearTimeout(searchTimer);
+    const q=e.target.value.trim();
+    if(q.length<2){document.getElementById('searchResults').innerHTML='<div class="sr-empty">Type to search</div>';document.getElementById('searchHint').textContent='';return;}
+    searchTimer=setTimeout(()=>doSearch(q),400);
+  });
+
+  // Bookmarks
+  document.getElementById('bookmarksBtn').addEventListener('click',()=>{renderBookmarksModal();document.getElementById('bookmarksModal').classList.toggle('open');});
+  document.getElementById('closeBookmarksModal').addEventListener('click',()=>document.getElementById('bookmarksModal').classList.remove('open'));
+  document.getElementById('bookmarksModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+  // Reading plan
+  document.getElementById('planBtn').addEventListener('click',openPlanModal);
+  document.getElementById('closePlanModal').addEventListener('click',()=>document.getElementById('planModal').classList.remove('open'));
+  document.getElementById('planModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+  // Advanced modal
+  document.getElementById('openAdvModal').addEventListener('click',()=>document.getElementById('advModal').classList.add('open'));
+  document.getElementById('closeAdvModal').addEventListener('click',()=>document.getElementById('advModal').classList.remove('open'));
+  document.getElementById('advModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+  // Keys modal
+  document.getElementById('openKeysModal').addEventListener('click',()=>document.getElementById('keysModal').classList.add('open'));
+  document.getElementById('closeKeysModal').addEventListener('click',()=>document.getElementById('keysModal').classList.remove('open'));
+  document.getElementById('keysModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+  document.getElementById('esvKeySave').addEventListener('click',saveEsvKey);
+  document.getElementById('esvKeyInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveEsvKey();});
+  document.getElementById('apiBibleKeySave').addEventListener('click',saveApiBibleKey);
+  document.getElementById('apiBibleKeyInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveApiBibleKey();});
+
+  // Context menu — right-click
+  document.getElementById('readingSurface').addEventListener('contextmenu',e=>{
+    const vl=e.target.closest('.verse-line[data-v]');
+    if(vl){e.preventDefault();showCtx(e.clientX,e.clientY,vl);}
+  });
+  // Context menu — long-press
+  document.getElementById('readingSurface').addEventListener('touchstart',e=>{
+    touchMoved=false;
+    const vl=e.target.closest('.verse-line[data-v]');
+    if(vl){
+      const t=e.touches[0];
+      longPressTimer=setTimeout(()=>{if(!touchMoved)showCtx(t.clientX,t.clientY,vl);},500);
+    }
+  },{passive:true});
+  document.addEventListener('touchmove',()=>{touchMoved=true;clearTimeout(longPressTimer);},{passive:true});
+  document.addEventListener('touchend',()=>clearTimeout(longPressTimer),{passive:true});
+
+  document.getElementById('ctxCopy').addEventListener('click',()=>{copyVerse(ctxTarget);hideCtx();});
+  document.getElementById('ctxBookmark').addEventListener('click',()=>{if(ctxTarget)toggleBookmark(ctxTarget);hideCtx();});
+  document.addEventListener('click',e=>{
+    if(e.target.closest('.bottom-tab-bar'))return;
+    if(!document.getElementById('ctxMenu').contains(e.target))hideCtx();
+  });
+
+  // Bottom tab bar (mobile)
+  function setTabActive(id){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
+    if(id)document.getElementById(id)?.classList.add('tab-active');
+  }
+  document.getElementById('tabSearch')?.addEventListener('click',()=>{
+    const so=document.getElementById('searchOverlay');
+    const isOpen=so.classList.contains('open');
+    closeAll();
+    if(!isOpen){so.classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),120);}
+    setTabActive(isOpen?null:'tabSearch');
+  });
+  document.getElementById('tabBookmarks')?.addEventListener('click',()=>{
+    const bm=document.getElementById('bookmarksModal');
+    const isOpen=bm.classList.contains('open');
+    closeAll();
+    if(!isOpen){renderBookmarksModal();bm.classList.add('open');}
+    setTabActive(isOpen?null:'tabBookmarks');
+  });
+  document.getElementById('tabPlan')?.addEventListener('click',()=>{
+    const pm=document.getElementById('planModal');
+    const isOpen=pm.classList.contains('open');
+    closeAll();
+    if(!isOpen)openPlanModal();
+    setTabActive(isOpen?null:'tabPlan');
+  });
+  document.getElementById('tabSettings')?.addEventListener('click',()=>{
+    const sp=document.getElementById('settingsPanel');
+    const isOpen=sp.classList.contains('open');
+    closeAll();
+    if(!isOpen)sp.classList.add('open');
+    setTabActive(isOpen?null:'tabSettings');
+  });
+  // Also apply body theme to bottom tab bar background
+  const origApplyBodyAttrs=applyBodyAttrs;
+
+  // Book/chapter selector
+  document.getElementById('referenceBtn').addEventListener('click',openSelector);
+  document.getElementById('referenceBtn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')openSelector();});
+  document.getElementById('selectorClose').addEventListener('click',closeSelector);
+
+  // Navigation buttons + keyboard
+  document.getElementById('prevBtn').addEventListener('click',()=>step(-1));
+  document.getElementById('nextBtn').addEventListener('click',()=>step(1));
+  document.addEventListener('keydown',e=>{
+    if(['SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(e.key==='ArrowRight')step(1);
+    if(e.key==='ArrowLeft')step(-1);
+    if(e.key==='/')  {e.preventDefault();document.getElementById('searchOverlay').classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),100);}
+    if(e.key==='Escape')closeAll();
+  });
+
+  // Swipe gestures
+  let swipeX=0,swipeY=0;
+  document.addEventListener('touchstart',e=>{swipeX=e.touches[0].clientX;swipeY=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(e.target.closest('.settings-panel,.modal-overlay,.search-overlay,.selector-overlay,button,input,select'))return;
+    const dx=e.changedTouches[0].clientX-swipeX;
+    const dy=e.changedTouches[0].clientY-swipeY;
+    if(Math.abs(dx)>64&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?step(1):step(-1);}
+  },{passive:true});
+
+  applyBodyAttrs();
+  render(true);
+});
+</script>
+<!-- ── Bottom tab bar (mobile) ──────────────────── -->
+<nav class="bottom-tab-bar" id="bottomTabBar" aria-label="Main navigation">
+  <button class="tab-btn" id="tabSearch" aria-label="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span>Search</span>
+  </button>
+  <button class="tab-btn" id="tabBookmarks" aria-label="Bookmarks">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    <span>Saved</span>
+  </button>
+  <button class="tab-btn" id="tabPlan" aria-label="Reading Plan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+    <span>Plan</span>
+  </button>
+  <button class="tab-btn" id="tabSettings" aria-label="Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Settings</span>
+  </button>
+</nav>
+
+</body>
+</html>
