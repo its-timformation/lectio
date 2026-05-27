@@ -55,7 +55,24 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 
 /* ── Top bar ── */
 .top-bar{position:fixed;inset:0 0 auto 0;height:calc(var(--bar-h) + var(--sat));padding-top:var(--sat);background:var(--bg);border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding-left:max(16px,var(--sal));padding-right:max(16px,var(--sar));z-index:50;transition:background-color .5s,border-color .5s;}
-@media(display-mode:standalone){.top-bar{border-bottom:none;}}
+/* ── PWA standalone: auto-hide top bar ── */
+@media(display-mode:standalone){
+  .top-bar{
+    border-bottom:none;
+    transform:translateY(-100%);
+    transition:transform .3s cubic-bezier(.4,0,.2,1),background-color .5s,border-color .5s;
+  }
+  .top-bar.pwa-visible{transform:translateY(0);}
+  /* page doesn't need top padding when bar is hidden */
+  .page{padding-top:var(--sat);}
+  .comp-tab-strip{top:var(--sat);}
+  /* tap zone at very top to reveal bar */
+  .pwa-tap-zone{
+    position:fixed;top:0;left:0;right:0;
+    height:calc(32px + var(--sat));
+    z-index:49;
+  }
+}
 .top-left{display:flex;align-items:center;justify-content:flex-start;min-width:0;}
 .top-mid{display:flex;align-items:center;justify-content:center;}
 .top-right{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
@@ -356,7 +373,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 </head>
 <body data-theme="paper" data-size="medium" data-lh="normal" data-rw="normal" data-align="justify" data-parsp="normal" data-font="garamond" data-ls="normal" data-dysfont="false" data-contrast="normal">
 
-<header class="top-bar">
+<!-- PWA tap zone — reveals top bar when tapped in standalone mode -->
+<div class="pwa-tap-zone" id="pwaTapZone"></div>
+
+<header class="top-bar" id="topBar">
   <div class="top-left">
     <div class="top-ref" id="referenceBtn" role="button" tabindex="0">
       <span class="top-book" id="topBook">——</span>
@@ -870,6 +890,7 @@ function step(dir){
   if(dir>0){if(S.chapter<max)S.chapter++;else if(idx<ALL_BOOKS.length-1){S.book=ALL_BOOKS[idx+1][0];S.chapter=1;}else return;}
   else{if(S.chapter>1)S.chapter--;else if(idx>0){S.book=ALL_BOOKS[idx-1][0];S.chapter=ALL_BOOKS[idx-1][1];}else return;}
   render(true);
+  if(window._pwaShowBar)window._pwaShowBar();
 }
 
 // ═══ VERSE SELECTION + ACTION BAR ═══════════════
@@ -1208,18 +1229,31 @@ document.addEventListener('DOMContentLoaded',async()=>{
   // Service worker
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-  // White icon with amber L
+  // Apple-touch-icon: load Cormorant Garamond then draw
   try{
-    const c=document.createElement('canvas');c.width=c.height=180;
-    const ctx=c.getContext('2d');
-    ctx.fillStyle='#FFFFFF';
-    ctx.beginPath();ctx.roundRect(0,0,180,180,22);ctx.fill();
-    ctx.fillStyle='#B8722E';
-    ctx.font='italic bold 160px Georgia,serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('L',88,97);
-    const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');
-    document.head.appendChild(l);
+    const f=new FontFace('Cormorant Garamond','url(https://fonts.gstatic.com/s/cormorantgaramond/v22/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYqXtK.woff2)',{style:'italic',weight:'400'});
+    f.load().then(font=>{
+      document.fonts.add(font);
+      const c=document.createElement('canvas');c.width=c.height=512;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#FFFFFF';
+      ctx.beginPath();ctx.roundRect(0,0,512,512,72);ctx.fill();
+      ctx.fillStyle='#B8722E';
+      ctx.font='italic 460px "Cormorant Garamond",Georgia,serif';
+      ctx.textAlign='center';ctx.textBaseline='alphabetic';
+      ctx.fillText('L',248,390);
+      const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');
+      document.head.appendChild(l);
+    }).catch(()=>{
+      // Fallback with Georgia
+      const c=document.createElement('canvas');c.width=c.height=512;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#FFFFFF';ctx.beginPath();ctx.roundRect(0,0,512,512,72);ctx.fill();
+      ctx.fillStyle='#B8722E';ctx.font='italic 420px Georgia,serif';
+      ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('L',248,390);
+      const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');
+      document.head.appendChild(l);
+    });
   }catch(e){}
 
   document.getElementById('bookmarksBtn').classList.toggle('active',S.bookmarks.length>0);
@@ -1355,6 +1389,25 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)>64&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?step(1):step(-1);}
   },{passive:true});
+
+  // PWA standalone: auto-hide top bar, tap top edge to reveal it
+  const isPWA=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
+  if(isPWA){
+    const topBar=document.getElementById('topBar');
+    let pwaTimer=null;
+    function showPwaBar(ms=3000){
+      topBar.classList.add('pwa-visible');
+      clearTimeout(pwaTimer);
+      pwaTimer=setTimeout(()=>topBar.classList.remove('pwa-visible'),ms);
+    }
+    // Tap the invisible zone at very top of screen to reveal bar
+    document.getElementById('pwaTapZone')?.addEventListener('click',()=>showPwaBar(3000));
+    // Keep bar visible while user is interacting with it
+    topBar.addEventListener('click',()=>showPwaBar(4000));
+    // Show briefly after each chapter navigation
+    const _origRender=render;
+    window._pwaShowBar=()=>showPwaBar(2500);
+  }
 
   render(true);
 });
