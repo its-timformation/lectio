@@ -76,9 +76,30 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .page{padding-top:calc(var(--bar-h) + var(--sat));padding-bottom:96px;min-height:100vh;}
 .reading-surface{max-width:var(--read-width);margin:0 auto;padding:0 28px;transition:opacity .3s;}
 .reading-surface.loading{opacity:.2;pointer-events:none;}
-.reading-surface.compare-grid{max-width:1600px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0;}
+/* ── Compare tab strip (mobile) ── */
+.comp-tab-strip{display:none;position:sticky;top:calc(var(--bar-h) + var(--sat));z-index:40;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:background-color .5s,border-color .5s;}
+.comp-tab-strip::-webkit-scrollbar{display:none;}
+.comp-tab-strip-inner{display:flex;min-width:100%;}
+.comp-tab{padding:10px 18px;font-family:var(--sans);font-size:.7rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;flex-shrink:0;min-height:44px;display:flex;align-items:center;}
+.comp-tab.active{color:var(--hi);border-bottom-color:var(--hi);}
+/* ── Compare grid ── */
+.reading-surface.compare-grid{max-width:1600px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0;}
 .compare-col{padding:0 28px;border-right:1px solid var(--col-rule);}
 .compare-col:last-child{border-right:none;}
+/* ── Compare picker modal ── */
+.cp-group-label{font-family:var(--sans);font-weight:400;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted);padding:16px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.cp-item{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s;min-height:48px;-webkit-tap-highlight-color:transparent;}
+.cp-item:last-child{border-bottom:none;}
+.cp-item.is-primary{opacity:.45;cursor:default;pointer-events:none;}
+.cp-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.cp-item.selected .cp-check{background:var(--hi);border-color:var(--hi);}
+.cp-item.selected .cp-check::after{content:'';width:7px;height:7px;border-radius:50%;background:#fff;}
+.cp-abbr{font-family:var(--sc);font-size:.7rem;letter-spacing:.14em;color:var(--hi);width:46px;flex-shrink:0;}
+.cp-name{font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text-soft);flex:1;}
+.cp-primary-badge{font-family:var(--sans);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);background:var(--bg-sub);border:1px solid var(--border);border-radius:2px;padding:2px 5px;white-space:nowrap;}
+.comp-apply-btn{width:100%;margin-top:20px;padding:13px;background:var(--hi);color:#fff;border:none;border-radius:4px;font-family:var(--sans);font-size:.78rem;font-weight:400;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;}
+.comp-apply-btn:hover{opacity:.85;}
+.comp-current-label{font-family:var(--sans);font-size:.74rem;font-weight:300;color:var(--text-muted);min-height:18px;margin-top:6px;}
 
 /* ── Chapter header ── */
 .chapter-meta{text-align:center;padding:64px 0 52px;}
@@ -187,21 +208,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .open-sec-badge{font-family:var(--sc);font-size:.6rem;letter-spacing:.12em;color:var(--text-muted);}
 
 /* Comparison chips */
-.comp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:28px;}
-.comp-chip{display:flex;align-items:center;gap:5px;background:var(--hi);color:#fff;border-radius:3px;padding:4px 8px;font-family:var(--sans);font-size:.68rem;font-weight:400;}
-.chip-x{background:none;border:none;color:inherit;cursor:pointer;padding:0 0 0 2px;line-height:1;opacity:.7;font-size:1rem;}
-.chip-x:hover{opacity:1;}
-.comp-empty{font-family:var(--sans);font-size:.76rem;font-weight:300;color:var(--text-muted);padding:2px 0;}
-.comp-typeahead{position:relative;}
-.comp-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:9px 10px;font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text);outline:none;transition:border-color .2s;}
-.comp-input:focus{border-color:var(--text-muted);}
-.comp-input::placeholder{color:var(--text-muted);}
-.comp-dropdown{position:fixed;background:var(--bg);border:1px solid var(--border);border-radius:3px;box-shadow:0 8px 24px var(--shadow);max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:200;display:none;}
-.comp-dropdown.open{display:block;}
-.comp-opt{padding:10px 12px;font-family:var(--sans);font-size:.8rem;font-weight:300;color:var(--text-soft);cursor:pointer;transition:background .12s;display:flex;justify-content:space-between;align-items:center;min-height:44px;}
-.comp-opt:hover{background:var(--bg-sub);}
-.comp-opt.added{opacity:.35;pointer-events:none;}
-.comp-opt-abbr{font-family:var(--sc);font-size:.6rem;color:var(--text-muted);letter-spacing:.12em;}
+/* open-sec-btn below */
 
 /* ── Modals ── */
 .modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s;}
@@ -310,6 +317,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .page-nav{padding:20px 18px;}
   .chapter-meta{padding:40px 0 32px;}
   .compare-col{padding:0 16px;}
+  /* Mobile compare: horizontal scroll-snap, one column at a time */
+  .reading-surface.compare-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:100vw;}
+  .reading-surface.compare-grid::-webkit-scrollbar{display:none;}
+  .reading-surface.compare-grid .compare-col{scroll-snap-align:start;flex-shrink:0;width:100vw;min-width:100vw;border-right:none;padding:0 20px;}
+  .comp-tab-strip{display:flex;}
   .top-hint{display:none;}
   .top-wordmark-centre{display:none;}
   .top-wordmark-right{display:block;font-size:1rem;}
@@ -320,7 +332,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .top-book{font-size:.76rem;}
   .top-ch{font-size:.76rem;}
   .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
-  .comp-input,.key-input,.search-input,select{font-size:16px !important;}
+  .key-input,.search-input,select{font-size:16px !important;}
   .modal-overlay{padding:0;align-items:flex-end;}
   .modal-card{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;padding:28px 20px calc(28px + var(--sab));max-height:88vh;}
   .modal-card.wide{max-width:100%;}
@@ -363,6 +375,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   </div>
 </header>
 
+<!-- Compare tab strip (mobile only) -->
+<div class="comp-tab-strip" id="compTabStrip"><div class="comp-tab-strip-inner" id="compTabInner"></div></div>
+
 <div class="page">
   <div id="readingSurface" class="reading-surface"><div class="status-msg">A quiet place to read.</div></div>
   <nav class="page-nav" id="pageNav">
@@ -404,8 +419,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
     </div>
     <div class="s-sec">
       <h3>Compare</h3>
-      <div class="comp-chips" id="compChips"></div>
-      <div class="comp-typeahead"><input type="text" class="comp-input" id="compInput" placeholder="Search to add…" autocomplete="off"><div class="comp-dropdown" id="compDropdown"></div></div>
+      <button class="open-sec-btn" id="openCompareModal">
+        <span>Choose translations</span>
+        <span class="open-sec-badge" id="compBadge">None</span>
+      </button>
+      <div class="comp-current-label" id="compCurrentLabel"></div>
     </div>
     <div class="s-sec">
       <h3>Format</h3>
@@ -520,6 +538,16 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   </div>
 </div>
 
+<!-- Compare picker modal -->
+<div class="modal-overlay" id="compareModal" role="dialog">
+  <div class="modal-card wide">
+    <div class="modal-title"><span>Compare Translations</span><button class="modal-close" id="closeCompareModal">Close ×</button></div>
+    <p style="font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">Select additional translations to read side by side.</p>
+    <div id="comparePickerList"></div>
+    <button class="comp-apply-btn" id="compApplyBtn">Done</button>
+  </div>
+</div>
+
 <!-- Search -->
 <div class="search-overlay" id="searchOverlay">
   <div class="search-bar">
@@ -559,8 +587,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <script>
 // ═══ PERSONAL CONFIG ════════════════════════════
 const CONFIG = {
-  esvKey:      '9f69dd23a61013e2dd9385c4d46d87126b7fbff9',
-  apiBibleKey: 'UgEBpBmtItCwT8EF18Rkb',
+  esvKey:      '',  // Stored securely as Netlify env var ESV_API_KEY
+  apiBibleKey: '',  // Stored securely as Netlify env var BIBLE_API_KEY
 };
 
 // ═══ DATA ═══════════════════════════════════════
@@ -622,8 +650,8 @@ async function fetchApiBibleCh(bibleId,book,ch){
   const k=`ab:${bibleId}|${book}|${ch}`;
   if(S.cache.has(k))return S.cache.get(k);
   const osis=OSIS[book];if(!osis)throw new Error('Unknown book: '+book);
-  const url=`https://rest.api.bible/v1/bibles/${bibleId}/chapters/${osis}.${ch}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
-  const r=await fetch(url,{headers:{'api-key':S.apiKey}});
+  const url=`/.netlify/functions/bible?path=bibles/${bibleId}/chapters/${osis}.${ch}&content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
+  const r=await fetch(url);
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`API.Bible error (${r.status})`);}
   const d=await r.json();S.cache.set(k,d);return d;
 }
@@ -637,15 +665,16 @@ function parseEsvVerses(text){
 }
 async function fetchEsv(book,ch){
   const k=`esv|${book}|${ch}`;if(S.cache.has(k))return S.cache.get(k);
-  const url=`https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(book+' '+ch)}&include-verse-numbers=true&include-footnotes=false&include-headings=false&include-chapter-numbers=false&include-short-copyright=false&indent-paragraphs=false&indent-poetry=false&include-passage-references=false`;
-  const r=await fetch(url,{headers:{Authorization:`Token ${S.esvApiKey}`}});
+  const params=new URLSearchParams({endpoint:'passage/text',q:`${book} ${ch}`,'include-verse-numbers':'true','include-footnotes':'false','include-headings':'false','include-chapter-numbers':'false','include-short-copyright':'false','indent-paragraphs':'false','indent-poetry':'false','include-passage-references':'false'});
+  const url=`/.netlify/functions/esv?${params}`;
+  const r=await fetch(url);
   if(!r.ok)throw new Error(`ESV error (${r.status})`);
   const raw=await r.json();
   const d={verses:parseEsvVerses((raw.passages||[])[0]||''),copyright:'The Holy Bible, English Standard Version® © 2001 Crossway'};
   S.cache.set(k,d);return d;
 }
 async function loadApiBibles(key){
-  const r=await fetch('https://rest.api.bible/v1/bibles?language=eng',{headers:{'api-key':key}});
+  const r=await fetch('/.netlify/functions/bible?path=bibles&language=eng');
   if(!r.ok)throw new Error(`Invalid key (${r.status})`);
   return(await r.json()).data||[];
 }
@@ -810,10 +839,12 @@ async function render(scrollToTop=false){
       surf.className='reading-surface compare-grid';
       surf.classList.toggle('hide-verse-nums',!S.showVerseNums);
       surf.innerHTML=results.map((d,i)=>`<div class="compare-col">${buildText(d,allSpecs[i],true)}</div>`).join('');
+      buildTabStrip(allSpecs);
     }else{
       surf.className='reading-surface';
       surf.classList.toggle('hide-verse-nums',!S.showVerseNums);
       surf.innerHTML=buildText(results[0],S.translation1,false);
+      buildTabStrip([]);
     }
     attachVerseHandlers();
     document.getElementById('appInfoCopyright').textContent=S.copyrightLines.join(' · ');
@@ -971,9 +1002,9 @@ async function doSearch(query){
   // If on a free (ba:) translation, automatically fall back to best search-capable one
   let spec=S.translation1;
   if(spec.startsWith('ba:')){
-    if(S.esvApiKey){
-      spec='esv:esv';
-    }else if(S.apiKey&&S.apiBibles.length){
+    if(true){
+      spec='esv:esv'; // proxy handles key server-side
+    }else if(S.apiBibles.length){
       const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
       spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
     }else{
@@ -986,13 +1017,13 @@ async function doSearch(query){
   try{
     let items=[];
     if(src==='esv'&&S.esvApiKey){
-      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
+      const r=await fetch(`/.netlify/functions/esv?endpoint=passage%2Fsearch&q=${encodeURIComponent(query)}&page-size=15`);
       if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
       items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
       hint.textContent=`${data.total_results||0} results · ESV`;
     }else if(src==='ab'&&S.apiKey){
-      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
+      const r=await fetch(`/.netlify/functions/bible?path=bibles/${id}/search&query=${encodeURIComponent(query)}&limit=15&sort=relevance`);
       if(!r.ok)throw new Error(`Search error (${r.status})`);
       const data=await r.json();
       items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
@@ -1045,31 +1076,54 @@ function openPlanModal(){
   document.getElementById('planModal').classList.add('open');
 }
 
-// ═══ COMPARISON CHIPS ═══════════════════════════
-function renderChips(){
-  const wrap=document.getElementById('compChips');
-  if(S.comparedSpecs.length===0){wrap.innerHTML='<span class="comp-empty">None — search below</span>';return;}
-  wrap.innerHTML=S.comparedSpecs.map(sp=>`<div class="comp-chip"><span>${esc(translLabel(sp))}</span><button class="chip-x" data-spec="${sp}">×</button></div>`).join('');
-  wrap.querySelectorAll('.chip-x').forEach(btn=>{btn.addEventListener('click',()=>{S.comparedSpecs=S.comparedSpecs.filter(s=>s!==btn.dataset.spec);renderChips();render();});});
+// ═══ COMPARE BADGE + PICKER ═════════════════════
+function updateCompareBadge(){
+  const n=S.comparedSpecs.length;
+  document.getElementById('compBadge').textContent=n===0?'None':`+${n} translation${n>1?'s':''}`;
+  const labels=S.comparedSpecs.map(sp=>translLabel(sp));
+  document.getElementById('compCurrentLabel').textContent=labels.length?labels.join(' · '):'';
 }
-function positionDropdown(){
-  const dd=document.getElementById('compDropdown');
-  const r=document.getElementById('compInput').getBoundingClientRect();
-  dd.style.top=(r.bottom+3)+'px';dd.style.left=r.left+'px';dd.style.width=r.width+'px';
+
+function openComparePicker(){
+  renderComparePicker();
+  document.getElementById('compareModal').classList.add('open');
 }
-function renderDropdown(q){
-  const dd=document.getElementById('compDropdown');
+
+function renderComparePicker(){
   const all=getAllTranslations();
-  const lq=q.toLowerCase().trim();
-  const res=(lq?all.filter(t=>(t.name||'').toLowerCase().includes(lq)||(t.short||'').toLowerCase().includes(lq)):all).slice(0,10);
-  positionDropdown();
-  if(!res.length){dd.innerHTML='<div class="comp-opt" style="pointer-events:none;opacity:.4">No results</div>';dd.classList.add('open');return;}
-  dd.innerHTML=res.map(t=>{const added=S.comparedSpecs.includes(t.spec)||t.spec===S.translation1;return`<div class="comp-opt${added?' added':''}" data-spec="${t.spec}"><span>${esc(t.name)}</span><span class="comp-opt-abbr">${esc(t.short||'')}</span></div>`;}).join('');
-  dd.classList.add('open');
-  dd.scrollTop=0;
-  dd.querySelectorAll('.comp-opt:not(.added)').forEach(el=>{
-    const pick=e=>{e.preventDefault();S.comparedSpecs.push(el.dataset.spec);document.getElementById('compInput').value='';dd.classList.remove('open');renderChips();render();};
-    el.addEventListener('mousedown',pick);el.addEventListener('touchend',pick,{passive:false});
+  const primary=S.translation1;
+  const pop=[],classic=[],oth=[];
+  all.forEach(t=>{
+    const a=(t.short||'').toUpperCase();
+    if(t.spec===primary)return;
+    if(POPULAR_ORDER.includes(a))pop.push(t);
+    else if(FREE.some(f=>f.spec===t.spec))classic.push(t);
+    else oth.push(t);
+  });
+  pop.sort((a,b)=>POPULAR_ORDER.indexOf(a.short.toUpperCase())-POPULAR_ORDER.indexOf(b.short.toUpperCase()));
+  const primaryTrans=all.find(t=>t.spec===primary)||{name:translLabel(primary),short:translLabel(primary),spec:primary};
+  function itemHTML(t,isPrimary){
+    const sel=S.comparedSpecs.includes(t.spec);
+    return`<div class="cp-item${sel?' selected':''}${isPrimary?' is-primary':''}" data-spec="${t.spec}">
+      <div class="cp-check"></div>
+      <span class="cp-abbr">${esc(t.short||'')}</span>
+      <span class="cp-name">${esc(t.name||t.short||'')}</span>
+      ${isPrimary?'<span class="cp-primary-badge">Primary</span>':''}
+    </div>`;
+  }
+  function group(label,items){
+    if(!items.length)return'';
+    return`<div class=cp-group-label>${label}</div>${items.map(t=>itemHTML(t,false)).join('')}`;
+  }
+  const list=document.getElementById('comparePickerList');
+  list.innerHTML=itemHTML(primaryTrans,true)+group('Popular Translations',pop)+group('Classic &amp; Public Domain',classic)+group('Other Translations',oth);
+  list.querySelectorAll('.cp-item:not(.is-primary)').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const spec=el.dataset.spec;
+      if(S.comparedSpecs.includes(spec)){S.comparedSpecs=S.comparedSpecs.filter(s=>s!==spec);el.classList.remove('selected');}
+      else{S.comparedSpecs.push(spec);el.classList.add('selected');}
+      updateCompareBadge();render();
+    });
   });
 }
 
@@ -1080,9 +1134,9 @@ async function saveEsvKey(){
   if(!key){st.textContent='Enter a key first.';st.className='key-status err';return;}
   st.textContent='Checking…';st.className='key-status';
   try{
-    const r=await fetch('https://api.esv.org/v3/passage/text/?q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false',{headers:{Authorization:`Token ${key}`}});
+    const r=await fetch('/.netlify/functions/esv?endpoint=passage%2Ftext&q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false');
     if(!r.ok)throw new Error(`Rejected (${r.status})`);
-    S.esvApiKey=key;localStorage.setItem('lectio-esv-key',key);buildSelect();renderChips();
+    S.esvApiKey=key;localStorage.setItem('lectio-esv-key',key);buildSelect();updateCompareBadge();
     st.textContent='✓ ESV connected';st.className='key-status ok';
   }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
 }
@@ -1093,7 +1147,7 @@ async function saveApiBibleKey(){
   st.textContent='Checking…';st.className='key-status';
   try{
     const bibles=await loadApiBibles(key);
-    S.apiKey=key;S.apiBibles=bibles;localStorage.setItem('lectio-apibible-key',key);buildSelect();renderChips();
+    S.apiKey=key;S.apiBibles=bibles;localStorage.setItem('lectio-apibible-key',key);buildSelect();updateCompareBadge();
     st.textContent=`✓ Connected — ${bibles.length} translations`;st.className='key-status ok';
   }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
 }
@@ -1150,7 +1204,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
   if(S.esvApiKey){document.getElementById('esvKeyStatus').textContent='✓ ESV connected';document.getElementById('esvKeyStatus').className='key-status ok';}
 
-  buildSelect();renderChips();
+  buildSelect();updateCompareBadge();
 
   // Pre-fill key inputs
   if(S.esvApiKey)document.getElementById('esvKeyInput').value=S.esvApiKey;
@@ -1192,18 +1246,16 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   document.getElementById('translation1Select').addEventListener('change',e=>{S.translation1=e.target.value;persist();render();});
 
-  // Typeahead
-  const compInput=document.getElementById('compInput'),compDd=document.getElementById('compDropdown');
-  compInput.addEventListener('focus',()=>renderDropdown(compInput.value));
-  compInput.addEventListener('input',()=>renderDropdown(compInput.value));
-  compInput.addEventListener('blur',()=>setTimeout(()=>compDd.classList.remove('open'),150));
-  document.getElementById('settingsPanel').addEventListener('scroll',()=>{if(compDd.classList.contains('open'))positionDropdown();});
-  window.addEventListener('resize',()=>{if(compDd.classList.contains('open'))positionDropdown();});
+  // Compare picker modal
+  document.getElementById('openCompareModal').addEventListener('click',openComparePicker);
+  document.getElementById('closeCompareModal').addEventListener('click',()=>document.getElementById('compareModal').classList.remove('open'));
+  document.getElementById('compApplyBtn').addEventListener('click',()=>document.getElementById('compareModal').classList.remove('open'));
+  document.getElementById('compareModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
 
   // Settings panel
   const panel=document.getElementById('settingsPanel');
   document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
-  document.getElementById('settingsClose').addEventListener('click',()=>{panel.classList.remove('open');compDd.classList.remove('open');});
+  document.getElementById('settingsClose').addEventListener('click',()=>panel.classList.remove('open'));
   document.addEventListener('click',e=>{
     if(!panel.classList.contains('open'))return;
     if(panel.contains(e.target))return;
