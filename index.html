@@ -31,8 +31,8 @@
   --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
 }
 [data-theme="sepia"]{--bg:#F4E9D0;--bg-sub:#EDE0C3;--text:#251505;--text-soft:#4A2E10;--text-muted:#8A7040;--ghost:#B89050;--col-rule:#D0BC96;--border:#D5C49A;--shadow:rgba(40,20,0,.1);--accent:#3D2005;--hi:#8B4A18;}
-[data-theme="night"]{--bg:#1A1612;--bg-sub:#221D17;--text:#E8E0D0;--text-soft:#C8BEA8;--text-muted:#706050;--ghost:#6A4820;--col-rule:#2A2318;--border:#2E2820;--shadow:rgba(0,0,0,.4);--accent:#E8E0D0;--hi:#D4943A;}
-@media(prefers-color-scheme:dark){[data-theme="auto"]{--bg:#1A1612;--bg-sub:#221D17;--text:#E8E0D0;--text-soft:#C8BEA8;--text-muted:#706050;--ghost:#6A4820;--col-rule:#2A2318;--border:#2E2820;--shadow:rgba(0,0,0,.4);--accent:#E8E0D0;--hi:#D4943A;}}
+[data-theme="night"]{--bg:#1A1612;--bg-sub:#221D17;--text:#E8E0D0;--text-soft:#C8BEA8;--text-muted:#706050;--ghost:#C4843A;--col-rule:#2A2318;--border:#2E2820;--shadow:rgba(0,0,0,.4);--accent:#E8E0D0;--hi:#D4943A;}
+@media(prefers-color-scheme:dark){[data-theme="auto"]{--bg:#1A1612;--bg-sub:#221D17;--text:#E8E0D0;--text-soft:#C8BEA8;--text-muted:#706050;--ghost:#C4843A;--col-rule:#2A2318;--border:#2E2820;--shadow:rgba(0,0,0,.4);--accent:#E8E0D0;--hi:#D4943A;}}
 [data-size="small"]{--base-size:15px;}[data-size="medium"]{--base-size:18px;}[data-size="large"]{--base-size:22px;}
 [data-lh="tight"]{--line-height:1.5;}[data-lh="normal"]{--line-height:1.84;}[data-lh="loose"]{--line-height:2.2;}
 [data-rw="narrow"]{--read-width:520px;}[data-rw="normal"]{--read-width:660px;}[data-rw="wide"]{--read-width:820px;}
@@ -98,7 +98,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .hide-verse-nums .verse-num,.hide-verse-nums [data-number]{display:none;}
 
 /* ── Verse selection ── */
-.verse-line.v-selected,.v-span.v-selected{background:rgba(184,114,46,.15);border-radius:3px;}
+.verse-line.v-selected,.v-span.v-selected{text-decoration:underline;text-decoration-color:var(--hi);text-underline-offset:3px;text-decoration-thickness:2px;}
 .verse-line[data-highlight="yellow"]{background:rgba(255,220,50,.28);}
 .verse-line[data-highlight="green"]{background:rgba(80,180,80,.22);}
 .verse-line[data-highlight="blue"]{background:rgba(60,140,240,.2);}
@@ -312,8 +312,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .compare-col{padding:0 16px;}
   .top-hint{display:none;}
   .top-wordmark-centre{display:none;}
-  .top-wordmark-right{display:block;font-size:1rem;margin-left:auto;}
+  .top-wordmark-right{display:block;font-size:1rem;}
   .top-mid{display:none;}
+  .top-bar{grid-template-columns:1fr auto;}
   #planBtn,#searchBtn,#bookmarksBtn,#settingsToggle{display:none;}
   .top-ref{padding:5px 10px 5px 9px;}
   .top-book{font-size:.76rem;}
@@ -568,7 +569,7 @@ const ALL_BOOKS=[...BOOKS.old,...BOOKS.new];
 const OSIS={'Genesis':'GEN','Exodus':'EXO','Leviticus':'LEV','Numbers':'NUM','Deuteronomy':'DEU','Joshua':'JOS','Judges':'JDG','Ruth':'RUT','1 Samuel':'1SA','2 Samuel':'2SA','1 Kings':'1KI','2 Kings':'2KI','1 Chronicles':'1CH','2 Chronicles':'2CH','Ezra':'EZR','Nehemiah':'NEH','Esther':'EST','Job':'JOB','Psalms':'PSA','Proverbs':'PRO','Ecclesiastes':'ECC','Song of Solomon':'SNG','Isaiah':'ISA','Jeremiah':'JER','Lamentations':'LAM','Ezekiel':'EZK','Daniel':'DAN','Hosea':'HOS','Joel':'JOL','Amos':'AMO','Obadiah':'OBA','Jonah':'JON','Micah':'MIC','Nahum':'NAM','Habakkuk':'HAB','Zephaniah':'ZEP','Haggai':'HAG','Zechariah':'ZEC','Malachi':'MAL','Matthew':'MAT','Mark':'MRK','Luke':'LUK','John':'JHN','Acts':'ACT','Romans':'ROM','1 Corinthians':'1CO','2 Corinthians':'2CO','Galatians':'GAL','Ephesians':'EPH','Philippians':'PHP','Colossians':'COL','1 Thessalonians':'1TH','2 Thessalonians':'2TH','1 Timothy':'1TI','2 Timothy':'2TI','Titus':'TIT','Philemon':'PHM','Hebrews':'HEB','James':'JAS','1 Peter':'1PE','2 Peter':'2PE','1 John':'1JN','2 John':'2JN','3 John':'3JN','Jude':'JUD','Revelation':'REV'};
 const FREE=[{spec:'ba:web',name:'World English Bible',short:'WEB'},{spec:'ba:kjv',name:'King James Version (1769)',short:'KJV'},{spec:'ba:webbe',name:'WEB British Edition',short:'WEBBE'},{spec:'ba:oeb-us',name:'Open English Bible (US)',short:'OEB'},{spec:'ba:bbe',name:'Bible in Basic English',short:'BBE'},{spec:'ba:clementine',name:'Clementine Vulgate (Latin)',short:'VUL'}];
 // Popular first for the tiered list
-const POPULAR_ORDER=['NIV','NLT','ESV','MSG','NASB','NASB2020','CSB','NKJV','NET','AMP','GNT','NCV','CEB','CEV','GW'];
+const POPULAR_ORDER=['NIV','NIV11','NIVUK','NLT','NLT2015','ESV','MSG','NASB','NASB2020','CSB','NKJV','NET','AMP','GNT','NCV','CEB','CEV','GW'];
 const SECONDARY_ORDER=['NRSV','NRSVUE','RSV','ASV','YLT','DBY','ERV'];
 
 // ═══ PERSISTENCE ════════════════════════════════
@@ -966,24 +967,38 @@ async function doSearch(query){
   const hint=document.getElementById('searchHint');
   const results=document.getElementById('searchResults');
   results.innerHTML='<div class="sr-empty">Searching…</div>';
-  const spec=S.translation1;
+
+  // If on a free (ba:) translation, automatically fall back to best search-capable one
+  let spec=S.translation1;
+  if(spec.startsWith('ba:')){
+    if(S.esvApiKey){
+      spec='esv:esv';
+    }else if(S.apiKey&&S.apiBibles.length){
+      const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
+      spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
+    }else{
+      results.innerHTML='<div class="sr-empty">Search needs an ESV or API.Bible key — add them via Settings → App Info &amp; Keys.</div>';
+      hint.textContent='';return;
+    }
+  }
+
   const[src,...rest]=spec.split(':');const id=rest.join(':');
   try{
     let items=[];
     if(src==='esv'&&S.esvApiKey){
       const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
-      if(!r.ok)throw new Error(`ESV search failed (${r.status})`);
+      if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
       items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
-      hint.textContent=`${data.total_results||0} results in ESV`;
+      hint.textContent=`${data.total_results||0} results · ESV`;
     }else if(src==='ab'&&S.apiKey){
       const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
-      if(!r.ok)throw new Error(`Search failed (${r.status})`);
+      if(!r.ok)throw new Error(`Search error (${r.status})`);
       const data=await r.json();
       items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
-      hint.textContent=`${data.data?.total||'?'} results in ${translLabel(spec)}`;
+      hint.textContent=`${data.data?.total||'?'} results · ${translLabel(spec)}`;
     }else{
-      results.innerHTML='<div class="sr-empty">Search works with ESV or API.Bible translations.<br>Switch your primary translation in Settings to a modern version, or add your API keys via App Info.</div>';
+      results.innerHTML='<div class="sr-empty">No search-capable translation available. Add keys via Settings → App Info.</div>';
       hint.textContent='';return;
     }
     if(!items.length){results.innerHTML='<div class="sr-empty">No results found</div>';return;}
@@ -1051,6 +1066,7 @@ function renderDropdown(q){
   if(!res.length){dd.innerHTML='<div class="comp-opt" style="pointer-events:none;opacity:.4">No results</div>';dd.classList.add('open');return;}
   dd.innerHTML=res.map(t=>{const added=S.comparedSpecs.includes(t.spec)||t.spec===S.translation1;return`<div class="comp-opt${added?' added':''}" data-spec="${t.spec}"><span>${esc(t.name)}</span><span class="comp-opt-abbr">${esc(t.short||'')}</span></div>`;}).join('');
   dd.classList.add('open');
+  dd.scrollTop=0;
   dd.querySelectorAll('.comp-opt:not(.added)').forEach(el=>{
     const pick=e=>{e.preventDefault();S.comparedSpecs.push(el.dataset.spec);document.getElementById('compInput').value='';dd.classList.remove('open');renderChips();render();};
     el.addEventListener('mousedown',pick);el.addEventListener('touchend',pick,{passive:false});
