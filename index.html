@@ -113,7 +113,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .verse-line[data-bookmarked="true"]::before{content:'';position:absolute;left:-8px;top:2px;bottom:2px;width:3px;background:var(--hi);border-radius:2px;opacity:.7;}
 
 /* ── Verse action bar ── */
-.verse-action-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--hi);padding:10px max(16px,var(--sal)) max(10px,var(--sab)) max(16px,var(--sal));display:flex;align-items:center;gap:10px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:55;box-shadow:0 -4px 20px var(--shadow);flex-wrap:wrap;}
+.verse-action-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--hi);padding:10px max(16px,var(--sal)) max(10px,var(--sab)) max(16px,var(--sal));display:flex;align-items:center;gap:10px;transform:translateY(calc(100% + 20px));transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:55;box-shadow:0 -4px 20px var(--shadow);flex-wrap:wrap;}
 .verse-action-bar.open{transform:translateY(0);}
 .vab-label{font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;color:var(--text-muted);flex-shrink:0;min-width:80px;}
 .vab-colours{display:flex;gap:6px;align-items:center;}
@@ -312,7 +312,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .compare-col{padding:0 16px;}
   .top-hint{display:none;}
   .top-wordmark-centre{display:none;}
-  .top-wordmark-right{display:block;font-size:1rem;}
+  .top-wordmark-right{display:block;font-size:1rem;margin-left:auto;}
   .top-mid{display:none;}
   #planBtn,#searchBtn,#bookmarksBtn,#settingsToggle{display:none;}
   .top-ref{padding:5px 10px 5px 9px;}
@@ -327,7 +327,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .search-bar{padding:calc(12px + var(--sat)) max(14px,var(--sal)) 12px;}
   .search-results{padding:8px 14px calc(40px + var(--sab));}
   .book-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
-  .verse-action-bar{bottom:calc(52px + var(--sab));padding-bottom:10px;}
+  .verse-action-bar{bottom:calc(52px + var(--sab));transform:translateY(calc(100% + 52px + var(--sab) + 20px));padding-bottom:10px;}
+  .verse-action-bar.open{transform:translateY(0);}
   .bottom-tab-bar{display:flex;position:fixed;bottom:0;left:0;right:0;height:calc(52px + var(--sab));padding-bottom:var(--sab);background:var(--bg);border-top:1px solid var(--border);z-index:50;justify-content:space-around;align-items:stretch;transition:background-color .5s,border-color .5s;}
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;color:var(--text-muted);gap:0;cursor:pointer;padding:8px 4px 4px;transition:color .15s;-webkit-tap-highlight-color:transparent;}
   .tab-btn svg{width:22px;height:22px;stroke-width:1.5;}
@@ -557,8 +558,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <script>
 // ═══ PERSONAL CONFIG ════════════════════════════
 const CONFIG = {
-  esvKey:      '',
-  apiBibleKey: '',
+  esvKey:      '9f69dd23a61013e2dd9385c4d46d87126b7fbff9',
+  apiBibleKey: 'UgEBpBmtItCwT8EF18Rkb',
 };
 
 // ═══ DATA ═══════════════════════════════════════
@@ -861,17 +862,27 @@ function updateActionBar(){
 }
 
 function applyHighlightToSelected(colour){
+  if(colour==='none'){
+    // Explicit remove swatch — always strip highlights
+    S.selectedVerses.forEach(v=>{
+      const key=`${S.book}|${S.chapter}|${v}`;
+      delete S.highlights[key];
+      document.querySelectorAll(`[data-v="${v}"]`).forEach(el=>delete el.dataset.highlight);
+    });
+    saveHighlights();clearSelection();return;
+  }
+  // Toggle: if every selected verse already has this colour, remove it; otherwise apply it
+  const allMatch=[...S.selectedVerses].every(v=>S.highlights[`${S.book}|${S.chapter}|${v}`]===colour);
   S.selectedVerses.forEach(v=>{
     const key=`${S.book}|${S.chapter}|${v}`;
-    if(colour==='none')delete S.highlights[key];
-    else S.highlights[key]=colour;
+    if(allMatch){delete S.highlights[key];}
+    else{S.highlights[key]=colour;}
     document.querySelectorAll(`[data-v="${v}"]`).forEach(el=>{
-      if(colour==='none')delete el.dataset.highlight;
+      if(allMatch)delete el.dataset.highlight;
       else el.dataset.highlight=colour;
     });
   });
-  saveHighlights();
-  clearSelection();
+  saveHighlights();clearSelection();
 }
 
 function clearSelection(){
