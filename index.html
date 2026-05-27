@@ -587,8 +587,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <script>
 // ═══ PERSONAL CONFIG ════════════════════════════
 const CONFIG = {
-  esvKey:      '',  // Stored securely as Netlify env var ESV_API_KEY
-  apiBibleKey: '',  // Stored securely as Netlify env var BIBLE_API_KEY
+  esvKey:      '9f69dd23a61013e2dd9385c4d46d87126b7fbff9',
+  apiBibleKey: 'UgEBpBmtItCwT8EF18Rkb',
 };
 
 // ═══ DATA ═══════════════════════════════════════
@@ -650,8 +650,8 @@ async function fetchApiBibleCh(bibleId,book,ch){
   const k=`ab:${bibleId}|${book}|${ch}`;
   if(S.cache.has(k))return S.cache.get(k);
   const osis=OSIS[book];if(!osis)throw new Error('Unknown book: '+book);
-  const url=`/.netlify/functions/bible?path=bibles/${bibleId}/chapters/${osis}.${ch}&content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
-  const r=await fetch(url);
+  const url=`https://rest.api.bible/v1/bibles/${bibleId}/chapters/${osis}.${ch}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
+  const r=await fetch(url,{headers:{'api-key':S.apiKey}});
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`API.Bible error (${r.status})`);}
   const d=await r.json();S.cache.set(k,d);return d;
 }
@@ -665,16 +665,15 @@ function parseEsvVerses(text){
 }
 async function fetchEsv(book,ch){
   const k=`esv|${book}|${ch}`;if(S.cache.has(k))return S.cache.get(k);
-  const params=new URLSearchParams({endpoint:'passage/text',q:`${book} ${ch}`,'include-verse-numbers':'true','include-footnotes':'false','include-headings':'false','include-chapter-numbers':'false','include-short-copyright':'false','indent-paragraphs':'false','indent-poetry':'false','include-passage-references':'false'});
-  const url=`/.netlify/functions/esv?${params}`;
-  const r=await fetch(url);
+  const url=`https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(book+' '+ch)}&include-verse-numbers=true&include-footnotes=false&include-headings=false&include-chapter-numbers=false&include-short-copyright=false&indent-paragraphs=false&indent-poetry=false&include-passage-references=false`;
+  const r=await fetch(url,{headers:{Authorization:`Token ${S.esvApiKey}`}});
   if(!r.ok)throw new Error(`ESV error (${r.status})`);
   const raw=await r.json();
   const d={verses:parseEsvVerses((raw.passages||[])[0]||''),copyright:'The Holy Bible, English Standard Version® © 2001 Crossway'};
   S.cache.set(k,d);return d;
 }
 async function loadApiBibles(key){
-  const r=await fetch('/.netlify/functions/bible?path=bibles&language=eng');
+  const r=await fetch('https://rest.api.bible/v1/bibles?language=eng',{headers:{'api-key':key}});
   if(!r.ok)throw new Error(`Invalid key (${r.status})`);
   return(await r.json()).data||[];
 }
@@ -1002,9 +1001,9 @@ async function doSearch(query){
   // If on a free (ba:) translation, automatically fall back to best search-capable one
   let spec=S.translation1;
   if(spec.startsWith('ba:')){
-    if(true){
-      spec='esv:esv'; // proxy handles key server-side
-    }else if(S.apiBibles.length){
+    if(S.esvApiKey){
+      spec='esv:esv';
+    }else if(S.apiKey&&S.apiBibles.length){
       const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
       spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
     }else{
@@ -1017,13 +1016,13 @@ async function doSearch(query){
   try{
     let items=[];
     if(src==='esv'&&S.esvApiKey){
-      const r=await fetch(`/.netlify/functions/esv?endpoint=passage%2Fsearch&q=${encodeURIComponent(query)}&page-size=15`);
+      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
       if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
       items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
       hint.textContent=`${data.total_results||0} results · ESV`;
     }else if(src==='ab'&&S.apiKey){
-      const r=await fetch(`/.netlify/functions/bible?path=bibles/${id}/search&query=${encodeURIComponent(query)}&limit=15&sort=relevance`);
+      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
       if(!r.ok)throw new Error(`Search error (${r.status})`);
       const data=await r.json();
       items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
@@ -1104,11 +1103,11 @@ function renderComparePicker(){
   const primaryTrans=all.find(t=>t.spec===primary)||{name:translLabel(primary),short:translLabel(primary),spec:primary};
   function itemHTML(t,isPrimary){
     const sel=S.comparedSpecs.includes(t.spec);
-    return`<div class="cp-item${sel?' selected':''}${isPrimary?' is-primary':''}" data-spec="${t.spec}">
-      <div class="cp-check"></div>
-      <span class="cp-abbr">${esc(t.short||'')}</span>
-      <span class="cp-name">${esc(t.name||t.short||'')}</span>
-      ${isPrimary?'<span class="cp-primary-badge">Primary</span>':''}
+    return`<div class=cp-item${sel? selected:}${isPrimary? is-primary:} data-spec=${t.spec}>
+      <div class=cp-check></div>
+      <span class=cp-abbr>${esc(t.short||'')}</span>
+      <span class=cp-name>${esc(t.name||t.short||'')}</span>
+      ${isPrimary?'<span class=cp-primary-badge>Primary</span>':''}
     </div>`;
   }
   function group(label,items){
@@ -1134,9 +1133,9 @@ async function saveEsvKey(){
   if(!key){st.textContent='Enter a key first.';st.className='key-status err';return;}
   st.textContent='Checking…';st.className='key-status';
   try{
-    const r=await fetch('/.netlify/functions/esv?endpoint=passage%2Ftext&q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false');
+    const r=await fetch('https://api.esv.org/v3/passage/text/?q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false',{headers:{Authorization:`Token ${key}`}});
     if(!r.ok)throw new Error(`Rejected (${r.status})`);
-    S.esvApiKey=key;localStorage.setItem('lectio-esv-key',key);buildSelect();updateCompareBadge();
+    S.esvApiKey=key;localStorage.setItem('lectio-esv-key',key);buildSelect();renderChips();
     st.textContent='✓ ESV connected';st.className='key-status ok';
   }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
 }
@@ -1147,7 +1146,7 @@ async function saveApiBibleKey(){
   st.textContent='Checking…';st.className='key-status';
   try{
     const bibles=await loadApiBibles(key);
-    S.apiKey=key;S.apiBibles=bibles;localStorage.setItem('lectio-apibible-key',key);buildSelect();updateCompareBadge();
+    S.apiKey=key;S.apiBibles=bibles;localStorage.setItem('lectio-apibible-key',key);buildSelect();renderChips();
     st.textContent=`✓ Connected — ${bibles.length} translations`;st.className='key-status ok';
   }catch(err){st.textContent='✗ '+err.message;st.className='key-status err';}
 }
@@ -1204,7 +1203,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
   if(S.esvApiKey){document.getElementById('esvKeyStatus').textContent='✓ ESV connected';document.getElementById('esvKeyStatus').className='key-status ok';}
 
-  buildSelect();updateCompareBadge();
+  buildSelect();renderChips();
 
   // Pre-fill key inputs
   if(S.esvApiKey)document.getElementById('esvKeyInput').value=S.esvApiKey;
@@ -1246,16 +1245,18 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   document.getElementById('translation1Select').addEventListener('change',e=>{S.translation1=e.target.value;persist();render();});
 
-  // Compare picker modal
-  document.getElementById('openCompareModal').addEventListener('click',openComparePicker);
-  document.getElementById('closeCompareModal').addEventListener('click',()=>document.getElementById('compareModal').classList.remove('open'));
-  document.getElementById('compApplyBtn').addEventListener('click',()=>document.getElementById('compareModal').classList.remove('open'));
-  document.getElementById('compareModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+  // Typeahead
+  const compInput=document.getElementById('compInput'),compDd=document.getElementById('compDropdown');
+  compInput.addEventListener('focus',()=>renderDropdown(compInput.value));
+  compInput.addEventListener('input',()=>renderDropdown(compInput.value));
+  compInput.addEventListener('blur',()=>setTimeout(()=>compDd.classList.remove('open'),150));
+  document.getElementById('settingsPanel').addEventListener('scroll',()=>{if(compDd.classList.contains('open'))positionDropdown();});
+  window.addEventListener('resize',()=>{if(compDd.classList.contains('open'))positionDropdown();});
 
   // Settings panel
   const panel=document.getElementById('settingsPanel');
   document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
-  document.getElementById('settingsClose').addEventListener('click',()=>panel.classList.remove('open'));
+  document.getElementById('settingsClose').addEventListener('click',()=>{panel.classList.remove('open');compDd.classList.remove('open');});
   document.addEventListener('click',e=>{
     if(!panel.classList.contains('open'))return;
     if(panel.contains(e.target))return;
