@@ -449,7 +449,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="settings-body">
     <div class="s-sec">
       <h3>Translation</h3>
-      <select class="styled-select" id="translation1Select"></select>
+      <button class="open-sec-btn" id="openTransPickerModal">
+        <span id="transPickerCurrentName">Loading…</span>
+        <span class="open-sec-badge" id="transPickerBadge">Change</span>
+      </button>
       <p class="s-note">Your translation is remembered automatically.</p>
     </div>
     <div class="s-sec">
@@ -571,6 +574,17 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
       <a href="https://scripture.api.bible" target="_blank" rel="noopener" class="key-link">↗ Get a free key at scripture.api.bible</a>
     </div>
     <div class="appinfo-cr" id="appInfoCopyright"></div>
+  </div>
+</div>
+
+<!-- Translation picker modal -->
+<div class="modal-overlay" id="transPickerModal" role="dialog">
+  <div class="modal-card wide">
+    <div class="modal-title">
+      <span>Select Translation</span>
+      <button class="modal-close" id="closeTransPickerModal">Close ×</button>
+    </div>
+    <div id="transPickerList"></div>
   </div>
 </div>
 
@@ -733,32 +747,76 @@ function getAllTranslations(){
   return[...FREE,...(S.esvApiKey?[{spec:'esv:esv',name:'English Standard Version',short:'ESV'}]:[]),...S.apiBibles.map(b=>({spec:`ab:${b.id}`,name:b.nameLocal||b.name||b.id,short:b.abbreviation||''}))];
 }
 function buildSelect(){
-  // Classic free translations
-  const classicOpts=FREE.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('');
-  // Popular modern translations (if keys present)
-  let popularGroup='', secondaryGroup='', otherGroup='';
-  if(S.apiBibles.length>0||S.esvApiKey){
-    const allMod=[];
-    if(S.esvApiKey)allMod.push({spec:'esv:esv',name:'English Standard Version',short:'ESV'});
-    S.apiBibles.forEach(b=>allMod.push({spec:`ab:${b.id}`,name:b.nameLocal||b.name||b.id,short:(b.abbreviation||'').toUpperCase()}));
-    const pop=[],sec=[],oth=[];
-    allMod.forEach(t=>{
-      const a=(t.short||'').toUpperCase();
-      if(POPULAR_ORDER.includes(a))pop.push(t);
-      else if(SECONDARY_ORDER.includes(a))sec.push(t);
-      else oth.push(t);
-    });
-    pop.sort((a,b)=>POPULAR_ORDER.indexOf(a.short.toUpperCase())-POPULAR_ORDER.indexOf(b.short.toUpperCase()));
-    sec.sort((a,b)=>SECONDARY_ORDER.indexOf(a.short.toUpperCase())-SECONDARY_ORDER.indexOf(b.short.toUpperCase()));
-    oth.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
-    if(pop.length)popularGroup=`<optgroup label="── Popular Translations ──">${pop.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('')}</optgroup>`;
-    if(sec.length)secondaryGroup=`<optgroup label="── Study Translations ──">${sec.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('')}</optgroup>`;
-    if(oth.length)otherGroup=`<optgroup label="── All Others ──">${oth.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('')}</optgroup>`;
+  // Sync hidden select for any legacy references, update picker button
+  let sel=document.getElementById('translation1Select');
+  if(!sel){
+    sel=document.createElement('select');
+    sel.id='translation1Select';
+    sel.style.display='none';
+    document.body.appendChild(sel);
   }
-  const html=`${popularGroup}<optgroup label="── Classic &amp; Public Domain ──">${classicOpts}</optgroup>${secondaryGroup}${otherGroup}${(!S.apiBibles.length&&!S.esvApiKey)?'<option disabled>── Add keys via App Info for NIV, NLT… ──</option>':''}`;
-  const sel=document.getElementById('translation1Select');
-  sel.innerHTML=html;sel.value=S.translation1;
-  if(!sel.value){sel.selectedIndex=0;S.translation1=FREE[0].spec;}
+  const all=getAllTranslations();
+  sel.innerHTML=all.map(t=>`<option value="${t.spec}">${t.name}</option>`).join('');
+  sel.value=S.translation1;
+  updateTransPickerButton();
+}
+
+function updateTransPickerButton(){
+  const all=getAllTranslations();
+  const cur=all.find(t=>t.spec===S.translation1);
+  const nameEl=document.getElementById('transPickerCurrentName');
+  if(nameEl)nameEl.textContent=cur?(cur.short?cur.short+' — '+cur.name:cur.name):translLabel(S.translation1);
+}
+
+function openTransPickerModal(){
+  renderTransPicker();
+  document.getElementById('transPickerModal').classList.add('open');
+}
+
+function renderTransPicker(){
+  const all=getAllTranslations();
+  const POPULAR=['NIV','NIV11','NIVUK','NLT','NLT2015','ESV','MSG','NASB','NASB2020','CSB','NKJV','NET','AMP','GNT','NCV','CEB','CEV','GW'];
+  const SECONDARY=['NRSV','NRSVUE','RSV','ASV','YLT','DBY','ERV'];
+  const pop=[],sec=[],classic=[],oth=[];
+  all.forEach(t=>{
+    const a=(t.short||'').toUpperCase();
+    if(POPULAR.includes(a))pop.push(t);
+    else if(SECONDARY.includes(a))sec.push(t);
+    else if(FREE.some(f=>f.spec===t.spec))classic.push(t);
+    else oth.push(t);
+  });
+  pop.sort((a,b)=>POPULAR.indexOf(a.short.toUpperCase())-POPULAR.indexOf(b.short.toUpperCase()));
+  sec.sort((a,b)=>SECONDARY.indexOf(a.short.toUpperCase())-SECONDARY.indexOf(b.short.toUpperCase()));
+  oth.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  function itemHTML(t){
+    const active=t.spec===S.translation1;
+    return`<div class="cp-item${active?' selected':''}" data-spec="${t.spec}">
+      <div class="cp-check"></div>
+      <span class="cp-abbr">${esc(t.short||'')}</span>
+      <span class="cp-name">${esc(t.name||t.short||'')}</span>
+    </div>`;
+  }
+  function group(label,items){
+    if(!items.length)return'';
+    return`<div class="cp-group-label">${label}</div>${items.map(t=>itemHTML(t)).join('')}`;
+  }
+  const list=document.getElementById('transPickerList');
+  list.innerHTML=
+    group('Popular Translations',pop)+
+    group('Classic &amp; Public Domain',classic)+
+    group('Study Translations',sec)+
+    group('Other Translations',oth);
+  list.querySelectorAll('.cp-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      S.translation1=el.dataset.spec;
+      list.querySelectorAll('.cp-item').forEach(i=>i.classList.remove('selected'));
+      el.classList.add('selected');
+      persist();render();
+      updateTransPickerButton();
+      updateTransLabel();
+      setTimeout(()=>document.getElementById('transPickerModal').classList.remove('open'),180);
+    });
+  });
 }
 
 // ═══ BIONIC READING ═════════════════════════════
@@ -1295,13 +1353,13 @@ function renderTransSwitcher(){
   document.getElementById('tsMore')?.addEventListener('click',e=>{
     e.stopPropagation();
     closeTransSwitcher();
-    setTimeout(()=>document.getElementById('settingsPanel').classList.add('open'),50);
+    setTimeout(()=>openTransPickerModal(),50);
   });
 }
 
 // ═══ CLOSE ALL ══════════════════════════════════
 function closeAll(){
-  ['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal','compareModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open');});
+  ['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal','compareModal','transPickerModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open');});
   closeSelector();
   closeTransSwitcher();
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
@@ -1388,7 +1446,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   initSeg('parSpCtrl','parSpacing',v=>document.body.dataset.parsp=v);
   initSeg('lsCtrl','letterSpacing',v=>document.body.dataset.ls=v);
 
-  document.getElementById('translation1Select').addEventListener('change',e=>{S.translation1=e.target.value;persist();render();});
+  // (translation changes now handled by renderTransPicker click handlers)
 
   // Compare picker modal
   document.getElementById('openCompareModal').addEventListener('click',openComparePicker);
@@ -1443,6 +1501,11 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('apiBibleKeyInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveApiBibleKey();});
 
   // Selector
+  // Translation picker modal
+  document.getElementById('openTransPickerModal').addEventListener('click',openTransPickerModal);
+  document.getElementById('closeTransPickerModal').addEventListener('click',()=>document.getElementById('transPickerModal').classList.remove('open'));
+  document.getElementById('transPickerModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
   // Translation quick-switcher
   document.getElementById('transBtn').addEventListener('click',e=>{
     e.stopPropagation();
