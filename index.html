@@ -1291,9 +1291,10 @@ function renderTransSwitcher(){
       persist();render();updateTransLabel();closeTransSwitcher();
     });
   });
-  document.getElementById('tsMore')?.addEventListener('click',()=>{
+  document.getElementById('tsMore')?.addEventListener('click',e=>{
+    e.stopPropagation();
     closeTransSwitcher();
-    document.getElementById('settingsPanel').classList.add('open');
+    setTimeout(()=>document.getElementById('settingsPanel').classList.add('open'),50);
   });
 }
 
