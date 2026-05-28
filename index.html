@@ -65,12 +65,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .top-right{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
 .top-wordmark{font-family:var(--display);font-weight:400;font-style:italic;font-size:1.15rem;letter-spacing:.04em;color:var(--hi);user-select:none;}
 .top-wordmark-right{display:none;}
-.top-ref{display:flex;align-items:center;gap:5px;cursor:pointer;padding:7px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;min-width:0;max-width:100%;}
+.top-ref{display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;min-width:0;max-width:100%;}
 .top-ref:hover{border-color:var(--text-muted);}
-.top-trans{display:flex;align-items:center;gap:4px;cursor:pointer;padding:7px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;flex-shrink:0;margin-left:6px;}
+.top-trans{display:flex;align-items:center;gap:4px;cursor:pointer;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;flex-shrink:0;margin-left:6px;}
 .top-trans:hover{border-color:var(--text-muted);}
 .top-trans-label{font-family:var(--sc);font-weight:500;font-size:.8rem;letter-spacing:.2em;color:var(--hi);}
-.top-trans-arrow{font-family:var(--sans);font-size:.58rem;color:var(--text-muted);opacity:.7;}
+.top-trans-arrow{display:none;}
 
 /* ── Translation quick-switcher ── */
 .trans-switcher{position:fixed;z-index:70;background:var(--bg);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 32px var(--shadow);min-width:220px;max-width:280px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s;}
@@ -93,7 +93,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .top-book{font-family:var(--sc);font-weight:500;font-size:.8rem;letter-spacing:.2em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .top-sep{font-family:var(--sc);font-size:.8rem;color:var(--border);font-weight:300;flex-shrink:0;}
 .top-ch{font-family:var(--sc);font-weight:400;font-size:.8rem;letter-spacing:.2em;color:var(--text-soft);flex-shrink:0;}
-.top-hint{font-family:var(--sans);font-size:.6rem;font-weight:300;color:var(--text-muted);opacity:.7;flex-shrink:0;}
+.top-hint{display:none;}
 .icon-btn{width:36px;height:36px;background:transparent;border:1px solid transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all .2s;flex-shrink:0;}
 .icon-btn:hover{border-color:var(--border);color:var(--text);}
 .icon-btn svg{width:15px;height:15px;}
@@ -357,10 +357,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .top-mid{display:none;}
   .top-bar{grid-template-columns:1fr auto;}
   #planBtn,#searchBtn,#bookmarksBtn,#settingsToggle{display:none;}
-  .top-ref{padding:6px 10px;}
+  .top-ref{padding:4px 9px;}
   .top-book{font-size:.72rem;}
   .top-ch{font-size:.72rem;}
-  .top-trans{padding:6px 10px;margin-left:4px;}
+  .top-trans{padding:4px 9px;margin-left:4px;}
   .top-trans-label{font-size:.72rem;}
   .top-trans-arrow{display:none;}
   .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
@@ -988,13 +988,17 @@ function selectedReference(){
   if(S.selectedVerses.size===0)return'';
   const nums=[...S.selectedVerses].map(Number).sort((a,b)=>a-b);
   if(nums.length===1)return`${S.book} ${S.chapter}:${nums[0]}`;
-  // Check if consecutive
-  let consecutive=true;
-  for(let i=1;i<nums.length;i++){if(nums[i]!==nums[i-1]+1){consecutive=false;break;}}
-  if(consecutive)return`${S.book} ${S.chapter}:${nums[0]}\u2013${nums[nums.length-1]}`;
-  // Non-consecutive: show up to 4 verse numbers then "..."
-  const parts=nums.slice(0,4).join(', ')+(nums.length>4?'…':'');
-  return`${S.book} ${S.chapter}:${parts}`;
+  // Group into consecutive runs, format each with en-dash
+  const runs=[];
+  let runStart=nums[0],runEnd=nums[0];
+  for(let i=1;i<nums.length;i++){
+    if(nums[i]===runEnd+1){runEnd=nums[i];}
+    else{runs.push(runStart===runEnd?`${runStart}`:`${runStart}\u2013${runEnd}`);runStart=runEnd=nums[i];}
+  }
+  runs.push(runStart===runEnd?`${runStart}`:`${runStart}\u2013${runEnd}`);
+  // Cap at 4 groups then ellipsis
+  const shown=runs.slice(0,4).join(', ')+(runs.length>4?'\u2026':'');
+  return`${S.book} ${S.chapter}:${shown}`;
 }
 
 function updateActionBar(){
