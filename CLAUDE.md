@@ -92,3 +92,31 @@ Keep the file private if your keys are filled in.
 - `sw.js` must be served from the root path `/sw.js` for the service worker scope to work
 - `manifest.json` must be at `/manifest.json`
 - `icon.svg` must be at `/icon.svg`
+
+## Versioning
+
+Lectio uses semantic versioning: `MAJOR.MINOR.PATCH`
+
+Current version: **1.3.0**
+
+### Rules
+- **PATCH** — bug fixes, tweaks, small visual changes → bump last number (`1.3.0` → `1.3.1`)
+- **MINOR** — new features, new settings, new UI components → bump middle number, reset patch (`1.3.x` → `1.4.0`)
+- **MAJOR** — full redesign or structural overhaul → bump first number (`1.x.x` → `2.0.0`)
+
+### Where to update
+Two places in `index.html`:
+1. `id="appVersion"` — the version number string e.g. `1.3.0`
+2. `id="appDate"` — the month/year e.g. `May 2026`
+
+### History
+| Version | What changed |
+|---------|-------------|
+| 1.0.0   | Initial build — single HTML file, WEB/KJV translations |
+| 1.1.0   | ESV + API.Bible keys, compare mode, formatting toggles |
+| 1.2.0   | PWA, mobile overhaul, verse actions, bookmarks, highlights |
+| 1.3.0   | Translation pill, compare modal redesign, Cloudflare migration, versioning |
+
+### Always tell the user
+Before handing over an updated file, say:
+> "This is version X.Y.Z — bumped [PATCH/MINOR/MAJOR] for [reason]."
