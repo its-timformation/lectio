@@ -67,6 +67,27 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .top-wordmark-right{display:none;}
 .top-ref{display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 12px 6px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;min-width:0;max-width:100%;}
 .top-ref:hover{border-color:var(--text-muted);}
+.top-trans{display:flex;align-items:center;gap:4px;cursor:pointer;padding:6px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s,background .2s;user-select:none;flex-shrink:0;margin-left:6px;}
+.top-trans:hover{border-color:var(--text-muted);}
+.top-trans-label{font-family:var(--sc);font-weight:400;font-size:.72rem;letter-spacing:.18em;color:var(--hi);}
+.top-trans-arrow{font-family:var(--sans);font-size:.58rem;color:var(--text-muted);opacity:.7;}
+
+/* ── Translation quick-switcher ── */
+.trans-switcher{position:fixed;z-index:70;background:var(--bg);border:1px solid var(--border);border-radius:6px;box-shadow:0 8px 32px var(--shadow);min-width:220px;max-width:280px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .2s,transform .2s;}
+.trans-switcher.open{opacity:1;pointer-events:auto;transform:translateY(0);}
+.ts-item{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;transition:background .12s;min-height:44px;border-bottom:1px solid var(--border);}
+.ts-item:last-child{border-bottom:none;}
+.ts-item:hover{background:var(--bg-sub);}
+.ts-item.active{background:var(--bg-sub);}
+.ts-name{font-family:var(--sans);font-size:.82rem;font-weight:300;color:var(--text-soft);}
+.ts-abbr{font-family:var(--sc);font-size:.66rem;letter-spacing:.14em;color:var(--hi);}
+.ts-check{color:var(--hi);font-size:.9rem;margin-left:8px;}
+.ts-more{font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--text-muted);letter-spacing:.06em;border-top:1px solid var(--border) !important;}
+/* Mobile: bottom sheet */
+@media(max-width:600px){
+  .trans-switcher{position:fixed;bottom:calc(52px + var(--sab));left:0;right:0;max-width:100%;border-radius:16px 16px 0 0;border-bottom:none;transform:translateY(20px);}
+  .trans-switcher.open{transform:translateY(0);}
+}
 .top-book{font-family:var(--sc);font-weight:500;font-size:.82rem;letter-spacing:.2em;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .top-sep{font-family:var(--sans);font-size:.62rem;color:var(--border);font-weight:300;flex-shrink:0;}
 .top-ch{font-family:var(--sc);font-weight:400;font-size:.82rem;letter-spacing:.16em;color:var(--text-soft);flex-shrink:0;}
@@ -335,6 +356,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .top-ref{padding:5px 10px 5px 9px;}
   .top-book{font-size:.76rem;}
   .top-ch{font-size:.76rem;}
+  .top-trans{padding:5px 8px;margin-left:4px;}
+  .top-trans-label{font-size:.68rem;}
+  .top-trans-arrow{display:none;}
   .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
   .key-input,.search-input,select{font-size:16px !important;}
   .modal-overlay{padding:0;align-items:flex-end;}
@@ -367,6 +391,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
       <span class="top-sep">·</span>
       <span class="top-ch" id="topCh">——</span>
       <span class="top-hint">↓</span>
+    </div>
+    <div class="top-trans" id="transBtn" role="button" tabindex="0" title="Switch translation">
+      <span class="top-trans-label" id="topTransLabel">—</span>
+      <span class="top-trans-arrow">↓</span>
     </div>
   </div>
   <div class="top-mid"><span class="top-wordmark top-wordmark-centre">Lectio</span></div>
@@ -408,6 +436,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Translation quick-switcher -->
+<div class="trans-switcher" id="transSwitcher"></div>
 
 <!-- Settings panel -->
 <aside class="settings-panel" id="settingsPanel">
@@ -591,8 +622,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <script>
 // ═══ PERSONAL CONFIG ════════════════════════════
 const CONFIG = {
-  esvKey:      '',  // Stored securely as Netlify env var ESV_API_KEY
-  apiBibleKey: '',  // Stored securely as Netlify env var BIBLE_API_KEY
+  esvKey:      '9f69dd23a61013e2dd9385c4d46d87126b7fbff9',
+  apiBibleKey: 'UgEBpBmtItCwT8EF18Rkb',
 };
 
 // ═══ DATA ═══════════════════════════════════════
@@ -654,8 +685,8 @@ async function fetchApiBibleCh(bibleId,book,ch){
   const k=`ab:${bibleId}|${book}|${ch}`;
   if(S.cache.has(k))return S.cache.get(k);
   const osis=OSIS[book];if(!osis)throw new Error('Unknown book: '+book);
-  const url=`/.netlify/functions/bible?path=bibles/${bibleId}/chapters/${osis}.${ch}&content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
-  const r=await fetch(url);
+  const url=`https://rest.api.bible/v1/bibles/${bibleId}/chapters/${osis}.${ch}?content-type=html&include-notes=false&include-titles=false&include-chapter-numbers=false&include-verse-numbers=true&include-verse-spans=true`;
+  const r=await fetch(url,{headers:{'api-key':S.apiKey}});
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||`API.Bible error (${r.status})`);}
   const d=await r.json();S.cache.set(k,d);return d;
 }
@@ -669,16 +700,15 @@ function parseEsvVerses(text){
 }
 async function fetchEsv(book,ch){
   const k=`esv|${book}|${ch}`;if(S.cache.has(k))return S.cache.get(k);
-  const params=new URLSearchParams({endpoint:'passage/text',q:`${book} ${ch}`,'include-verse-numbers':'true','include-footnotes':'false','include-headings':'false','include-chapter-numbers':'false','include-short-copyright':'false','indent-paragraphs':'false','indent-poetry':'false','include-passage-references':'false'});
-  const url=`/.netlify/functions/esv?${params}`;
-  const r=await fetch(url);
+  const url=`https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(book+' '+ch)}&include-verse-numbers=true&include-footnotes=false&include-headings=false&include-chapter-numbers=false&include-short-copyright=false&indent-paragraphs=false&indent-poetry=false&include-passage-references=false`;
+  const r=await fetch(url,{headers:{Authorization:`Token ${S.esvApiKey}`}});
   if(!r.ok)throw new Error(`ESV error (${r.status})`);
   const raw=await r.json();
   const d={verses:parseEsvVerses((raw.passages||[])[0]||''),copyright:'The Holy Bible, English Standard Version® © 2001 Crossway'};
   S.cache.set(k,d);return d;
 }
 async function loadApiBibles(key){
-  const r=await fetch('/.netlify/functions/bible?path=bibles&language=eng');
+  const r=await fetch('https://rest.api.bible/v1/bibles?language=eng',{headers:{'api-key':key}});
   if(!r.ok)throw new Error(`Invalid key (${r.status})`);
   return(await r.json()).data||[];
 }
@@ -830,6 +860,7 @@ async function render(scrollToTop=false){
   const surf=document.getElementById('readingSurface');
   document.getElementById('topBook').textContent=S.book.toUpperCase();
   document.getElementById('topCh').textContent=S.chapter;
+  updateTransLabel();
   applyBodyAttrs();
   surf.classList.add('loading');
   S.copyrightLines=[];
@@ -1006,9 +1037,9 @@ async function doSearch(query){
   // If on a free (ba:) translation, automatically fall back to best search-capable one
   let spec=S.translation1;
   if(spec.startsWith('ba:')){
-    if(true){
-      spec='esv:esv'; // proxy handles key server-side
-    }else if(S.apiBibles.length){
+    if(S.esvApiKey){
+      spec='esv:esv';
+    }else if(S.apiKey&&S.apiBibles.length){
       const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
       spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
     }else{
@@ -1021,13 +1052,13 @@ async function doSearch(query){
   try{
     let items=[];
     if(src==='esv'&&S.esvApiKey){
-      const r=await fetch(`/.netlify/functions/esv?endpoint=passage%2Fsearch&q=${encodeURIComponent(query)}&page-size=15`);
+      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
       if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
       items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
       hint.textContent=`${data.total_results||0} results · ESV`;
     }else if(src==='ab'&&S.apiKey){
-      const r=await fetch(`/.netlify/functions/bible?path=bibles/${id}/search&query=${encodeURIComponent(query)}&limit=15&sort=relevance`);
+      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
       if(!r.ok)throw new Error(`Search error (${r.status})`);
       const data=await r.json();
       items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
@@ -1138,7 +1169,7 @@ async function saveEsvKey(){
   if(!key){st.textContent='Enter a key first.';st.className='key-status err';return;}
   st.textContent='Checking…';st.className='key-status';
   try{
-    const r=await fetch('/.netlify/functions/esv?endpoint=passage%2Ftext&q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false');
+    const r=await fetch('https://api.esv.org/v3/passage/text/?q=John+1%3A1&include-verse-numbers=false&include-short-copyright=false',{headers:{Authorization:`Token ${key}`}});
     if(!r.ok)throw new Error(`Rejected (${r.status})`);
     S.esvApiKey=key;localStorage.setItem('lectio-esv-key',key);buildSelect();updateCompareBadge();
     st.textContent='✓ ESV connected';st.className='key-status ok';
@@ -1200,10 +1231,77 @@ function buildTabStrip(specs){
   },{passive:true});
 }
 
+// ═══ TRANSLATION QUICK-SWITCHER ═════════════════
+function updateTransLabel(){
+  const el=document.getElementById('topTransLabel');
+  if(el)el.textContent=translLabel(S.translation1);
+}
+
+function openTransSwitcher(){
+  renderTransSwitcher();
+  const sw=document.getElementById('transSwitcher');
+  // Position below the pill on desktop
+  const btn=document.getElementById('transBtn');
+  if(btn&&window.innerWidth>600){
+    const r=btn.getBoundingClientRect();
+    sw.style.top=(r.bottom+6)+'px';
+    sw.style.left=r.left+'px';
+    sw.style.bottom='';
+  }
+  sw.classList.add('open');
+}
+
+function closeTransSwitcher(){
+  document.getElementById('transSwitcher')?.classList.remove('open');
+}
+
+function renderTransSwitcher(){
+  const all=getAllTranslations();
+  // Build shortlist: popular first, max 7, then a "More" row
+  const QUICK=['NIV','NIV11','NIVUK','ESV','NLT','MSG','NASB','NASB2020','KJV','WEB'];
+  const shown=[];
+  // Add current if not already in quick list
+  const curLabel=translLabel(S.translation1);
+  QUICK.forEach(abbr=>{
+    const t=all.find(x=>(x.short||'').toUpperCase()===abbr);
+    if(t&&!shown.find(s=>s.spec===t.spec))shown.push(t);
+  });
+  // Ensure current translation always in list
+  const curTrans=all.find(t=>t.spec===S.translation1);
+  if(curTrans&&!shown.find(s=>s.spec===curTrans.spec))shown.unshift(curTrans);
+  // Cap at 8
+  const rows=shown.slice(0,8);
+
+  const sw=document.getElementById('transSwitcher');
+  sw.innerHTML=rows.map(t=>`
+    <div class="ts-item${t.spec===S.translation1?' active':''}" data-spec="${t.spec}">
+      <span class="ts-name">${esc(t.name)}</span>
+      <span class="ts-abbr">${esc(t.short||'')}</span>
+      ${t.spec===S.translation1?'<span class="ts-check">✓</span>':''}
+    </div>`).join('')+
+    `<div class="ts-item ts-more" id="tsMore">
+      <span class="ts-name">All translations…</span>
+      <span style="color:var(--text-muted);font-size:.8rem;">→</span>
+    </div>`;
+
+  sw.querySelectorAll('.ts-item:not(.ts-more)').forEach(el=>{
+    el.addEventListener('click',()=>{
+      S.translation1=el.dataset.spec;
+      document.getElementById('translation1Select').value=S.translation1;
+      persist();render();updateTransLabel();closeTransSwitcher();
+    });
+  });
+  document.getElementById('tsMore')?.addEventListener('click',()=>{
+    closeTransSwitcher();
+    document.getElementById('settingsPanel').classList.add('open');
+  });
+}
+
 // ═══ CLOSE ALL ══════════════════════════════════
 function closeAll(){
-  ['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open');});
+  ['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal','compareModal'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('open');});
   closeSelector();
+  closeTransSwitcher();
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
 }
 
@@ -1343,6 +1441,20 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('apiBibleKeyInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveApiBibleKey();});
 
   // Selector
+  // Translation quick-switcher
+  document.getElementById('transBtn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const sw=document.getElementById('transSwitcher');
+    if(sw.classList.contains('open')){closeTransSwitcher();}
+    else{closeAll();openTransSwitcher();}
+  });
+  document.addEventListener('click',e=>{
+    if(!document.getElementById('transSwitcher').contains(e.target)&&
+       !document.getElementById('transBtn').contains(e.target)){
+      closeTransSwitcher();
+    }
+  });
+
   document.getElementById('referenceBtn').addEventListener('click',openSelector);
   document.getElementById('referenceBtn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')openSelector();});
   document.getElementById('selectorClose').addEventListener('click',closeSelector);
