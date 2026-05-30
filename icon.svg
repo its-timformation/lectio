@@ -6,14 +6,14 @@
   </defs>
   <!-- Clean white background -->
   <rect width="512" height="512" rx="72" fill="#FFFFFF"/>
-  <!-- Italic L in Cormorant Garamond — same font as app wordmark -->
+  <!-- Italic L in Cormorant Garamond — slightly smaller, better proportioned -->
   <text
     x="248"
-    y="390"
+    y="360"
     font-family="'Cormorant Garamond', 'Garamond', Georgia, serif"
     font-style="italic"
     font-weight="400"
-    font-size="460"
+    font-size="360"
     text-anchor="middle"
     fill="#B8722E">L</text>
 </svg>
