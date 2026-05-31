@@ -163,19 +163,24 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .verse-line[data-bookmarked="true"]::before{content:'';position:absolute;left:-8px;top:2px;bottom:2px;width:3px;background:var(--hi);border-radius:2px;opacity:.7;}
 
 /* ── Verse action bar ── */
-.verse-action-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--hi);padding:10px max(16px,var(--sal)) max(10px,var(--sab)) max(16px,var(--sal));display:flex;align-items:center;gap:10px;transform:translateY(calc(100% + 20px));transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:55;box-shadow:0 -4px 20px var(--shadow);flex-wrap:wrap;}
+.verse-action-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--hi);padding:0 max(16px,var(--sal));display:flex;flex-direction:column;transform:translateY(calc(100% + 20px));transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:55;box-shadow:0 -4px 20px var(--shadow);}
 .verse-action-bar.open{transform:translateY(0);}
-.vab-label{font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;color:var(--text-muted);flex-shrink:0;min-width:80px;}
-.vab-colours{display:flex;gap:6px;align-items:center;}
-.vab-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0;}
-.vab-swatch:hover{transform:scale(1.2);border-color:var(--text-muted);}
-.vab-swatch[data-c="none"]{background:transparent;border:1px dashed var(--text-muted);position:relative;}
-.vab-swatch[data-c="none"]::after{content:'×';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-muted);}
-.vab-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;}
-.vab-btn{background:none;border:none;cursor:pointer;color:var(--text-soft);padding:6px;border-radius:4px;display:flex;align-items:center;gap:5px;font-family:var(--sans);font-size:.7rem;font-weight:300;letter-spacing:.08em;transition:color .15s,background .15s;min-height:36px;}
-.vab-btn:hover{color:var(--text);background:var(--bg-sub);}
-.vab-btn svg{width:16px;height:16px;}
-.vab-clear{margin-left:auto;color:var(--text-muted);}
+/* Row 1: reference + highlights */
+.vab-row1{display:flex;align-items:center;gap:10px;padding:10px 0 8px;border-bottom:1px solid var(--border);}
+/* Row 2: actions + close */
+.vab-row2{display:flex;align-items:center;gap:4px;padding:6px 0 max(10px,var(--sab));}
+.vab-label{font-family:var(--sc);font-size:.72rem;font-weight:400;letter-spacing:.14em;color:var(--text-soft);flex-shrink:0;}
+.vab-colours{display:flex;gap:8px;align-items:center;margin-left:auto;}
+.vab-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.vab-swatch:hover{transform:scale(1.15);border-color:var(--text-muted);}
+.vab-swatch[data-c="none"]{background:transparent;border:2px dashed var(--text-muted);position:relative;}
+.vab-swatch[data-c="none"]::after{content:'×';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text-muted);}
+.vab-divider{display:none;}
+.vab-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--text-soft);padding:0 14px;border-radius:20px;display:flex;align-items:center;gap:6px;font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.08em;transition:color .15s,background .15s,border-color .15s;min-height:44px;-webkit-tap-highlight-color:transparent;}
+.vab-btn:hover{color:var(--text);background:var(--bg-sub);border-color:var(--text-muted);}
+.vab-btn svg{width:15px;height:15px;}
+.vab-clear{margin-left:auto;border:none;padding:0 8px;color:var(--text-muted);}
+.vab-clear:hover{background:transparent;color:var(--text);}
 
 /* ── Toast ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg);font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;padding:9px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:350;}
@@ -206,6 +211,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 13px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-sub);z-index:1;transition:background-color .5s;}
 .settings-header h2{font-family:var(--sans);font-weight:300;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin:0;}
 .settings-close{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text-soft);cursor:pointer;font-family:var(--sans);font-size:.64rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.settings-footer{display:none;}
+.settings-footer-close{width:100%;background:none;border:none;border-top:1px solid var(--border);padding:14px 20px calc(14px + var(--sab));font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;transition:color .2s,background .2s;}
+.settings-footer-close:hover{color:var(--text);background:var(--bg-sub);}
 .settings-close:hover{border-color:var(--text-muted);color:var(--text);}
 .settings-close svg{width:11px;height:11px;}
 .settings-body{padding:20px 20px 0;}
@@ -364,6 +372,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .top-trans-label{font-size:.7rem;}
   .top-trans-arrow{display:none;}
   .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
+  .settings-footer{display:block;position:sticky;bottom:0;background:var(--bg-sub);}
+  .settings-body{padding-bottom:0;}
   .key-input,.search-input,select{font-size:16px !important;}
   .modal-overlay{padding:0;align-items:flex-end;}
   .modal-card{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;padding:28px 20px calc(28px + var(--sab));max-height:88vh;}
@@ -372,8 +382,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .search-bar{padding:calc(12px + var(--sat)) max(14px,var(--sal)) 12px;}
   .search-results{padding:8px 14px calc(40px + var(--sab));}
   .book-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
-  .verse-action-bar{bottom:calc(52px + var(--sab));transform:translateY(calc(100% + 52px + var(--sab) + 20px));padding-bottom:10px;}
+  .verse-action-bar{bottom:calc(52px + var(--sab));transform:translateY(calc(100% + 52px + var(--sab) + 20px));}
   .verse-action-bar.open{transform:translateY(0);}
+  .vab-row2{padding-bottom:calc(8px + var(--sab));}
   .bottom-tab-bar{display:flex;position:fixed;bottom:0;left:0;right:0;height:calc(52px + var(--sab));padding-bottom:var(--sab);background:var(--bg);border-top:1px solid var(--border);z-index:50;justify-content:space-around;align-items:stretch;transition:background-color .5s,border-color .5s;}
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;color:var(--text-muted);gap:0;cursor:pointer;padding:8px 4px 4px;transition:color .15s;-webkit-tap-highlight-color:transparent;}
   .tab-btn svg{width:22px;height:22px;stroke-width:1.5;}
@@ -424,19 +435,24 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 
 <!-- Verse action bar -->
 <div class="verse-action-bar" id="verseActionBar">
-  <span class="vab-label" id="vabLabel">0 verses</span>
-  <div class="vab-colours">
-    <div class="vab-swatch" data-c="yellow"  style="background:#FFE032" title="Yellow"></div>
-    <div class="vab-swatch" data-c="green"   style="background:#5DBF5D" title="Green"></div>
-    <div class="vab-swatch" data-c="blue"    style="background:#3C8CF0" title="Blue"></div>
-    <div class="vab-swatch" data-c="pink"    style="background:#E65080" title="Pink"></div>
-    <div class="vab-swatch" data-c="purple"  style="background:#9650C8" title="Purple"></div>
-    <div class="vab-swatch" data-c="none"    title="Remove highlight"></div>
+  <!-- Row 1: reference + colour swatches -->
+  <div class="vab-row1">
+    <span class="vab-label" id="vabLabel"></span>
+    <div class="vab-colours">
+      <div class="vab-swatch" data-c="yellow"  style="background:#FFE032" title="Yellow"></div>
+      <div class="vab-swatch" data-c="green"   style="background:#5DBF5D" title="Green"></div>
+      <div class="vab-swatch" data-c="blue"    style="background:#3C8CF0" title="Blue"></div>
+      <div class="vab-swatch" data-c="pink"    style="background:#E65080" title="Pink"></div>
+      <div class="vab-swatch" data-c="purple"  style="background:#9650C8" title="Purple"></div>
+      <div class="vab-swatch" data-c="none"    title="Remove highlight"></div>
+    </div>
   </div>
-  <div class="vab-divider"></div>
-  <button class="vab-btn" id="vabBookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save</button>
-  <button class="vab-btn" id="vabCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
-  <button class="vab-btn vab-clear" id="vabClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <!-- Row 2: save, copy, close -->
+  <div class="vab-row2">
+    <button class="vab-btn" id="vabBookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save</button>
+    <button class="vab-btn" id="vabCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+    <button class="vab-btn vab-clear" id="vabClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>Clear</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -503,6 +519,13 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
       <h3>About &amp; Info</h3>
       <button class="open-sec-btn" id="openAppInfoModal"><span>App Info &amp; Keys</span><span>↗</span></button>
     </div>
+  </div>
+  <!-- Mobile bottom close — easier thumb reach -->
+  <div class="settings-footer" id="settingsFooter">
+    <button class="settings-footer-close" id="settingsFooterClose">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      Close
+    </button>
   </div>
 </aside>
 
@@ -1061,15 +1084,17 @@ function bookmarkSelected(){
 
 function copySelected(){
   const lines=[];
-  // Sort numerically
   const sorted=[...S.selectedVerses].map(Number).sort((a,b)=>a-b);
   sorted.forEach(v=>{
     const el=document.querySelector(`[data-v="${v}"]`);
     const txt=(el?.dataset.txt||'').trim();
-    if(txt)lines.push(`[${v}] ${txt}`);
+    if(!txt)return;
+    // Respect verse numbers setting — only include number if turned on
+    if(S.showVerseNums)lines.push(`[${v}] ${txt}`);
+    else lines.push(txt);
   });
-  const ref=`${S.book} ${S.chapter} (${translLabel(S.translation1)})`;
-  const full=lines.join('\n')+'\n— '+ref;
+  const ref=`${selectedReference()} (${translLabel(S.translation1)})`;
+  const full=lines.join('\n')+'\n\n— '+ref;
   if(navigator.clipboard&&window.isSecureContext){
     navigator.clipboard.writeText(full).then(()=>showToast('Copied!')).catch(()=>fallbackCopy(full));
   }else fallbackCopy(full);
@@ -1105,8 +1130,17 @@ function fallbackCopy(text){const ta=document.createElement('textarea');ta.value
 let searchTimer=null;
 function parseRef(refStr){
   if(!refStr)return null;
-  for(const[name]of ALL_BOOKS){
-    if(refStr.startsWith(name)){const rest=refStr.slice(name.length).trim();const m=rest.match(/^(\d+):(\d+)/);if(m)return{book:name,ch:parseInt(m[1]),v:parseInt(m[2])};}
+  // Strip trailing parenthetical e.g. "(ESV)" or "(NLT)"
+  const clean=refStr.replace(/\s*\([^)]+\)\s*$/, '').trim();
+  // Try longest book name match first to handle "1 Corinthians" before "Corinthians"
+  const sorted=[...ALL_BOOKS].sort((a,b)=>b[0].length-a[0].length);
+  for(const[name]of sorted){
+    if(clean.startsWith(name)){
+      const rest=clean.slice(name.length).trim();
+      // Format: "3:16" or "3:16-18" or just "3"
+      const m=rest.match(/^(\d+)(?::(\d+))?/);
+      if(m)return{book:name,ch:parseInt(m[1]),v:m[2]?parseInt(m[2]):1};
+    }
   }
   return null;
 }
@@ -1136,7 +1170,7 @@ async function doSearch(query){
       const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
       if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
-      items=(data.results||[]).map(res=>({ref:res.reference,text:res.verses.map(v=>v.text).join(' ')}));
+      items=(data.results||[]).map(res=>({ref:res.reference,text:(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||''}));
       hint.textContent=`${data.total_results||0} results · ESV`;
     }else if(src==='ab'&&S.apiKey){
       const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
@@ -1479,6 +1513,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const panel=document.getElementById('settingsPanel');
   document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
   document.getElementById('settingsClose').addEventListener('click',()=>panel.classList.remove('open'));
+  document.getElementById('settingsFooterClose')?.addEventListener('click',()=>panel.classList.remove('open'));
   document.addEventListener('click',e=>{
     if(!panel.classList.contains('open'))return;
     if(panel.contains(e.target))return;
