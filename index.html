@@ -277,8 +277,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 /* ── Search overlay ── */
 .search-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;flex-direction:column;}
 .search-overlay.open{opacity:1;pointer-events:auto;}
-/* Search bar */
-.search-bar{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;flex-shrink:0;background:var(--bg);}
+.search-bar{padding:calc(14px + var(--sat)) 16px 10px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--bg);}
 .search-bar-row1{display:flex;align-items:center;gap:10px;}
 .search-input-wrap{position:relative;flex:1;}
 .search-input{width:100%;background:var(--bg-sub);border:1px solid var(--border);border-radius:24px;padding:10px 16px 10px 40px;font-family:var(--sans);font-size:1rem;font-weight:300;color:var(--text);outline:none;transition:border-color .2s;}
@@ -288,28 +287,38 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .search-icon-inner svg{width:15px;height:15px;}
 .search-close-btn{background:none;border:none;font-family:var(--sans);font-size:.64rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:8px 4px;min-height:44px;white-space:nowrap;flex-shrink:0;transition:color .2s;}
 .search-close-btn:hover{color:var(--text);}
-/* Filter chips */
-.search-filters{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
-.search-filters::-webkit-scrollbar{display:none;}
-.sf-chip{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-family:var(--sans);font-size:.65rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;min-height:32px;}
+/* Recent searches */
+.search-recent{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.search-recent-label{font-family:var(--sans);font-size:.6rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-right:2px;}
+.sr-recent-chip{background:var(--bg-sub);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--text-soft);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+.sr-recent-chip:hover{border-color:var(--text-muted);color:var(--text);}
+.sr-recent-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;line-height:1;padding:0;margin-left:2px;opacity:.6;}
+.sr-recent-del:hover{opacity:1;}
+/* Reference shortcut */
+.search-ref-hint{display:none;padding:10px 16px;background:var(--bg-sub);border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;flex-shrink:0;}
+.search-ref-hint:hover{background:var(--border);}
+.search-ref-hint.visible{display:flex;align-items:center;justify-content:space-between;}
+.search-ref-text{font-family:var(--display);font-style:italic;font-size:1rem;color:var(--text-soft);}
+.search-ref-arrow{font-family:var(--sans);font-size:.68rem;letter-spacing:.1em;color:var(--hi);}
+/* Book filter chips — built dynamically after search */
+.search-filter-bar{display:none;padding:8px 16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);flex-shrink:0;gap:6px;flex-wrap:nowrap;}
+.search-filter-bar::-webkit-scrollbar{display:none;}
+.search-filter-bar.visible{display:flex;}
+.sf-chip{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-family:var(--sans);font-size:.65rem;font-weight:400;letter-spacing:.08em;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;min-height:32px;-webkit-tap-highlight-color:transparent;}
 .sf-chip.active{background:var(--hi);border-color:var(--hi);color:#fff;}
-/* Results meta bar */
-.search-meta{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);min-height:36px;}
+/* Meta */
+.search-meta{padding:7px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);min-height:34px;}
 .search-meta-count{font-family:var(--sans);font-size:.68rem;font-weight:300;color:var(--text-muted);}
 .search-meta-trans{font-family:var(--sc);font-size:.65rem;letter-spacing:.14em;color:var(--hi);}
-/* Results list */
-.search-results{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 40px;}
-.sr-item{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;display:flex;flex-direction:column;gap:6px;}
+/* Results */
+.search-results{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.sr-item{padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
 .sr-item:hover{background:var(--bg-sub);}
-.sr-item:last-child{border-bottom:none;}
-.sr-item-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
-.sr-ref{font-family:var(--sc);font-size:.7rem;letter-spacing:.2em;color:var(--hi);flex-shrink:0;}
-.sr-book{font-family:var(--sans);font-size:.62rem;font-weight:300;color:var(--text-muted);letter-spacing:.08em;}
-.sr-text{font-family:var(--serif);font-size:1rem;color:var(--text-soft);line-height:1.65;}
-.sr-text mark{background:rgba(184,114,46,.18);color:var(--text);border-radius:2px;padding:0 2px;}
-.sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:64px 20px;font-size:1.2rem;line-height:1.6;}
-.sr-load-more{display:block;width:100%;padding:14px;background:none;border:none;border-top:1px solid var(--border);font-family:var(--sans);font-size:.7rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:color .2s,background .2s;min-height:52px;}
-.sr-load-more:hover{color:var(--text);background:var(--bg-sub);}
+.sr-ref{font-family:var(--sc);font-size:.7rem;letter-spacing:.18em;color:var(--hi);display:block;margin-bottom:5px;}
+.sr-text{font-family:var(--serif);font-size:1rem;color:var(--text-soft);line-height:1.7;}
+.sr-text mark{background:rgba(184,114,46,.2);color:var(--text);border-radius:2px;padding:0 2px;font-style:normal;}
+.sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:64px 20px;font-size:1.2rem;line-height:1.8;}
+.sr-sentinel{height:1px;}
 
 /* ── Bookmarks modal ── */
 .bk-item{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
@@ -648,27 +657,27 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
     <div class="search-bar-row1">
       <div class="search-input-wrap">
         <span class="search-icon-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
-        <input type="search" class="search-input" id="searchInput" placeholder="Search the Bible…" autocomplete="off" spellcheck="false">
+        <input type="search" class="search-input" id="searchInput" placeholder="Search or go to reference…" autocomplete="off" spellcheck="false">
       </div>
       <button class="search-close-btn" id="searchClose">Close</button>
     </div>
-    <!-- Book filter chips -->
-    <div class="search-filters" id="searchFilters">
-      <button class="sf-chip active" data-filter="all">All</button>
-      <button class="sf-chip" data-filter="old">Old Testament</button>
-      <button class="sf-chip" data-filter="new">New Testament</button>
-      <button class="sf-chip" data-filter="gospels">Gospels</button>
-      <button class="sf-chip" data-filter="epistles">Epistles</button>
-      <button class="sf-chip" data-filter="poetry">Poetry</button>
-      <button class="sf-chip" data-filter="prophecy">Prophecy</button>
-    </div>
+    <div class="search-recent" id="searchRecent" style="display:none"></div>
   </div>
+  <!-- Reference jump hint -->
+  <div class="search-ref-hint" id="searchRefHint">
+    <span class="search-ref-text" id="searchRefText"></span>
+    <span class="search-ref-arrow">Go to passage →</span>
+  </div>
+  <!-- Dynamic book filter chips -->
+  <div class="search-filter-bar" id="searchFilterBar"></div>
+  <!-- Meta bar -->
   <div class="search-meta" id="searchMeta" style="display:none">
     <span class="search-meta-count" id="searchMetaCount"></span>
     <span class="search-meta-trans" id="searchMetaTrans"></span>
   </div>
+  <!-- Results -->
   <div class="search-results" id="searchResults">
-    <div class="sr-empty">Type to search the Bible</div>
+    <div class="sr-empty">Search the Bible by keyword,<br>phrase, or reference</div>
   </div>
 </div>
 
@@ -1163,21 +1172,105 @@ function fallbackCopy(text){const ta=document.createElement('textarea');ta.value
 // ═══ SEARCH ═════════════════════════════════════
 
 // ═══ SEARCH ══════════════════════════════════════
-const BOOK_GROUPS={
-  all:null,
-  old:['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi'],
-  new:['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude','Revelation'],
-  gospels:['Matthew','Mark','Luke','John'],
-  epistles:['Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude'],
-  poetry:['Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Lamentations'],
-  prophecy:['Isaiah','Jeremiah','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi','Revelation']
-};
-let searchAllItems=[];  // full unfiltered results
-let searchFilter='all'; // current filter
-let searchPage=0;       // pagination
-const SEARCH_PAGE_SIZE=15;
+// ═══ SEARCH ══════════════════════════════════════
 
+// Theme → keyword expansion (silent — users just see their query)
+const THEME_MAP={
+  faith:['faith','trust','believe','belief','faithful','faithfulness'],
+  love:['love','loved','loves','charity','beloved','affection'],
+  hope:['hope','hoped','hoping','expectation','wait','waiting'],
+  grace:['grace','gracious','favour','favor','mercy','merciful','compassion'],
+  forgiveness:['forgive','forgiven','forgiveness','pardon','pardoned','reconcile','atone','atonement'],
+  prayer:['pray','prayer','praying','prayed','petition','intercede','intercession','supplicate'],
+  peace:['peace','peaceful','peaceable','rest','calm','still','quietness','tranquil'],
+  fear:['fear','afraid','anxious','anxiety','worry','dread','terror'],
+  strength:['strength','strong','power','mighty','might','courage','courageous','bold'],
+  wisdom:['wisdom','wise','understanding','knowledge','discernment','insight','prudent'],
+  salvation:['salvation','saved','save','redeem','redemption','rescue','delivered'],
+  joy:['joy','joyful','rejoice','gladness','delight','happy','happiness','celebrate'],
+  suffering:['suffer','suffering','pain','trial','tribulation','affliction','persecution','hardship'],
+  pride:['pride','proud','arrogant','arrogance','haughty','boast','boasting','humble','humility'],
+  anger:['anger','angry','wrath','rage','furious','indignation'],
+  death:['death','die','died','dead','mortality','grave','resurrection','life'],
+  sin:['sin','sinful','sinned','transgress','transgression','iniquity','wickedness','evil'],
+  obedience:['obey','obedience','commandment','command','law','follow','faithful'],
+  worship:['worship','praise','glorify','glory','honour','honor','exalt','adore'],
+  truth:['truth','true','truthful','honest','honesty','integrity','righteous','righteousness'],
+  healing:['heal','healed','healing','restore','restoration','wholeness','cure','miracles'],
+  light:['light','darkness','shine','lamp','illumine','illuminate'],
+  bread:['bread','food','nourish','hunger','hungry','feed','feast','manna'],
+  water:['water','thirst','thirsty','drink','river','living water','well','spring'],
+  shepherd:['shepherd','sheep','flock','pasture','lamb','guide','lead'],
+  creation:['create','creation','created','heaven','earth','universe','maker','beginning'],
+  covenant:['covenant','promise','oath','testament','pledge','vow'],
+  heart:['heart','soul','mind','spirit','inner'],
+};
+
+function expandQuery(q){
+  const lq=q.toLowerCase().trim();
+  // Check if query matches a theme key or any theme's keywords
+  for(const[theme,keywords]of Object.entries(THEME_MAP)){
+    if(lq===theme||keywords.includes(lq)){
+      return keywords;
+    }
+  }
+  // Multi-word phrase: check if it contains a theme word
+  for(const[theme,keywords]of Object.entries(THEME_MAP)){
+    if(keywords.some(k=>lq.includes(k)||k.includes(lq))){
+      return keywords;
+    }
+  }
+  // No theme match — use as-is
+  return[q];
+}
+
+// Recent searches
+const RECENT_KEY='lectio-recent-searches';
+function getRecentSearches(){try{return JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');}catch(e){return[];}}
+function addRecentSearch(q){
+  if(!q||q.length<2)return;
+  let r=getRecentSearches().filter(s=>s!==q);
+  r.unshift(q);r=r.slice(0,8);
+  localStorage.setItem(RECENT_KEY,JSON.stringify(r));
+}
+function removeRecentSearch(q){
+  localStorage.setItem(RECENT_KEY,JSON.stringify(getRecentSearches().filter(s=>s!==q)));
+}
+function renderRecentSearches(){
+  const wrap=document.getElementById('searchRecent');
+  const recent=getRecentSearches();
+  if(!recent.length){wrap.style.display='none';return;}
+  wrap.style.display='flex';
+  wrap.innerHTML=`<span class="search-recent-label">Recent</span>`+
+    recent.map(q=>`<span class="sr-recent-chip" data-q="${esc(q)}">
+      ${esc(q)}
+      <button class="sr-recent-del" data-q="${esc(q)}" title="Remove">×</button>
+    </span>`).join('');
+  wrap.querySelectorAll('.sr-recent-chip').forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.classList.contains('sr-recent-del'))return;
+      document.getElementById('searchInput').value=el.dataset.q;
+      doSearch(el.dataset.q);
+    });
+  });
+  wrap.querySelectorAll('.sr-recent-del').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      removeRecentSearch(btn.dataset.q);
+      renderRecentSearches();
+    });
+  });
+}
+
+let searchAllItems=[];
+let searchActiveFilter='all';
+let searchCurrentQuery='';
+let searchTransLabel='';
+let searchObserver=null;
+let searchRenderedCount=0;
+const SEARCH_BATCH=20;
 let searchTimer=null;
+
 function parseRef(refStr){
   if(!refStr)return null;
   const clean=refStr.replace(/\s*\([^)]+\)\s*$/,'').trim();
@@ -1192,77 +1285,140 @@ function parseRef(refStr){
   return null;
 }
 
-function highlightQuery(text,query){
-  if(!query||!text)return esc(text||'');
-  const words=query.trim().split(/\s+/).filter(w=>w.length>2);
-  if(!words.length)return esc(text);
-  const escaped=words.map(w=>w.replace(/[.*+?^${}()|\[\]\\]/g,'\\$&')).join('|'); const re=new RegExp(`(${escaped})`, 'gi');
-  return esc(text).replace(re,'<mark>$1</mark>');
+function detectReference(q){
+  // Check if query looks like a Bible reference
+  const sorted=[...ALL_BOOKS].sort((a,b)=>b[0].length-a[0].length);
+  for(const[name]of sorted){
+    const lname=name.toLowerCase();
+    const lq=q.toLowerCase().trim();
+    if(lq.startsWith(lname.slice(0,3))||lq.startsWith(lname)){
+      const parsed=parseRef(q);
+      if(parsed)return parsed;
+    }
+  }
+  return null;
 }
 
 function getBookFromRef(ref){
   const sorted=[...ALL_BOOKS].sort((a,b)=>b[0].length-a[0].length);
-  for(const[name]of sorted){if(ref.startsWith(name))return name;}
+  for(const[name]of sorted){if((ref||'').startsWith(name))return name;}
   return null;
 }
 
-function renderSearchResults(items,query,totalCount,transLabel){
+function highlightQuery(text,keywords){
+  if(!keywords||!keywords.length||!text)return esc(text||'');
+  const escaped=keywords.map(w=>w.replace(/[-[\]{}()*+?.,\^$|#\s]/g,'\$&')).join('|');
+  try{
+    const re=new RegExp(`(${escaped})`,'gi');
+    return esc(text).replace(re,'<mark>$1</mark>');
+  }catch(e){return esc(text);}
+}
+
+function buildFilterChips(items){
+  const bar=document.getElementById('searchFilterBar');
+  // Count results per book
+  const bookCounts={};
+  items.forEach(it=>{
+    const b=getBookFromRef(it.ref||'');
+    if(b)bookCounts[b]=(bookCounts[b]||0)+1;
+  });
+  const books=Object.entries(bookCounts).sort((a,b)=>b[1]-a[1]);
+  if(!books.length){bar.classList.remove('visible');return;}
+  
+  // OT/NT counts
+  const OT_BOOKS=new Set(['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi']);
+  const otCount=items.filter(it=>OT_BOOKS.has(getBookFromRef(it.ref||''))).length;
+  const ntCount=items.length-otCount;
+  
+  let html=`<button class="sf-chip${searchActiveFilter==='all'?' active':''}" data-filter="all">All (${items.length})</button>`;
+  if(otCount>0&&ntCount>0){
+    html+=`<button class="sf-chip${searchActiveFilter==='OT'?' active':''}" data-filter="OT">OT (${otCount})</button>`;
+    html+=`<button class="sf-chip${searchActiveFilter==='NT'?' active':''}" data-filter="NT">NT (${ntCount})</button>`;
+  }
+  // Individual books — all of them, sorted by count
+  books.forEach(([book,count])=>{
+    html+=`<button class="sf-chip${searchActiveFilter===book?' active':''}" data-filter="${esc(book)}">${esc(book)} (${count})</button>`;
+  });
+  bar.innerHTML=html;
+  bar.classList.add('visible');
+  
+  bar.querySelectorAll('.sf-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      searchActiveFilter=btn.dataset.filter;
+      bar.querySelectorAll('.sf-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      searchRenderedCount=0;
+      renderItems();
+    });
+  });
+}
+
+function getFilteredItems(){
+  const OT_BOOKS=new Set(['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi']);
+  if(searchActiveFilter==='all')return searchAllItems;
+  if(searchActiveFilter==='OT')return searchAllItems.filter(it=>OT_BOOKS.has(getBookFromRef(it.ref||'')));
+  if(searchActiveFilter==='NT')return searchAllItems.filter(it=>!OT_BOOKS.has(getBookFromRef(it.ref||'')));
+  return searchAllItems.filter(it=>getBookFromRef(it.ref||'')===searchActiveFilter);
+}
+
+function renderItems(){
   const results=document.getElementById('searchResults');
   const meta=document.getElementById('searchMeta');
   const metaCount=document.getElementById('searchMetaCount');
-  const metaTrans=document.getElementById('searchMetaTrans');
-
-  if(!items.length){
+  
+  const filtered=getFilteredItems();
+  if(!filtered.length){
+    results.innerHTML=`<div class="sr-empty">No results${searchActiveFilter!=='all'?' in '+searchActiveFilter:''}</div>`;
     meta.style.display='none';
-    results.innerHTML=`<div class="sr-empty">No results found for<br><em>"${esc(query)}"</em></div>`;
     return;
   }
-
-  // Apply filter
-  const filter=searchFilter;
-  const filterBooks=BOOK_GROUPS[filter];
-  const filtered=filterBooks?items.filter(it=>{const b=getBookFromRef(it.ref||'');return b&&filterBooks.includes(b);}):items;
-
-  // Paginate
-  const page=searchPage;
-  const start=page*SEARCH_PAGE_SIZE;
-  const paginated=filtered.slice(start,start+SEARCH_PAGE_SIZE);
-  const hasMore=filtered.length>start+SEARCH_PAGE_SIZE;
-
-  // Meta bar
+  
+  // Update meta
   meta.style.display='flex';
-  const showing=Math.min(filtered.length,start+SEARCH_PAGE_SIZE);
-  metaCount.textContent=totalCount?`${showing} of ${filtered.length}${filter!=='all'?' (filtered)':''} · ${totalCount} total`:`${showing} of ${filtered.length}${filter!=='all'?' (filtered)':''}`;
-  metaTrans.textContent=transLabel;
-
-  const html=paginated.map(it=>{
-    const ref=it.ref||'';
-    const txt=it.text||'';
-    const book=getBookFromRef(ref)||'';
-    const parsed=parseRef(ref);
-    const chapterRef=parsed?`${parsed.book} ${parsed.ch}`:'';
-    // Show ~200 chars of context with query highlighted
-    const snippet=txt.slice(0,220)+(txt.length>220?'…':'');
-    return`<div class="sr-item" data-ref="${esc(ref)}">
-      <div class="sr-item-header">
-        <span class="sr-ref">${esc(ref)}</span>
-        <span class="sr-book">${esc(book)}</span>
-      </div>
-      <div class="sr-text">${highlightQuery(snippet,query)}</div>
-    </div>`;
-  }).join('');
-
-  results.innerHTML=page===0?html:results.innerHTML.replace(/<button[^>]*sr-load-more[^>]*>.*?<\/button>/,'')+html;
-
-  if(hasMore){
-    const btn=document.createElement('button');
-    btn.className='sr-load-more';
-    btn.textContent=`Load more (${filtered.length-showing} remaining)`;
-    btn.addEventListener('click',()=>{searchPage++;renderSearchResults(items,query,totalCount,transLabel);});
-    results.appendChild(btn);
+  metaCount.textContent=`${filtered.length} result${filtered.length!==1?'s':''}`;
+  
+  // Disconnect old observer
+  if(searchObserver)searchObserver.disconnect();
+  
+  // Render first batch
+  const keywords=expandQuery(searchCurrentQuery);
+  const batch=filtered.slice(0,SEARCH_BATCH);
+  searchRenderedCount=batch.length;
+  
+  results.innerHTML=batch.map(it=>itemHTML(it,keywords)).join('')+
+    (filtered.length>SEARCH_BATCH?'<div class="sr-sentinel" id="srSentinel"></div>':'');
+  
+  wireResultClicks(results);
+  
+  // Infinite scroll via IntersectionObserver
+  if(filtered.length>SEARCH_BATCH){
+    searchObserver=new IntersectionObserver(entries=>{
+      if(!entries[0].isIntersecting)return;
+      const more=filtered.slice(searchRenderedCount,searchRenderedCount+SEARCH_BATCH);
+      if(!more.length){searchObserver.disconnect();return;}
+      searchRenderedCount+=more.length;
+      const sentinel=document.getElementById('srSentinel');
+      if(sentinel)sentinel.insertAdjacentHTML('beforebegin',more.map(it=>itemHTML(it,keywords)).join(''));
+      wireResultClicks(results);
+      if(searchRenderedCount>=filtered.length){searchObserver.disconnect();sentinel?.remove();}
+    },{rootMargin:'200px'});
+    const sentinel=document.getElementById('srSentinel');
+    if(sentinel)searchObserver.observe(sentinel);
   }
+}
 
-  results.querySelectorAll('.sr-item').forEach(el=>{
+function itemHTML(it,keywords){
+  const ref=it.ref||'';
+  const txt=it.text||'';
+  return`<div class="sr-item" data-ref="${esc(ref)}">
+    <span class="sr-ref">${esc(ref)}</span>
+    <div class="sr-text">${highlightQuery(txt,keywords)}</div>
+  </div>`;
+}
+
+function wireResultClicks(container){
+  container.querySelectorAll('.sr-item:not([data-wired])').forEach(el=>{
+    el.dataset.wired='1';
     el.addEventListener('click',()=>{
       const p=parseRef(el.dataset.ref);
       if(p){S.book=p.book;S.chapter=p.ch;closeAll();render(true);}
@@ -1271,12 +1427,21 @@ function renderSearchResults(items,query,totalCount,transLabel){
 }
 
 async function doSearch(query){
+  if(!query||query.length<2)return;
+  searchCurrentQuery=query;
+  searchActiveFilter='all';
+  searchRenderedCount=0;
+  if(searchObserver){searchObserver.disconnect();searchObserver=null;}
+  addRecentSearch(query);
+  
   const results=document.getElementById('searchResults');
   const meta=document.getElementById('searchMeta');
-  searchPage=0;
+  const filterBar=document.getElementById('searchFilterBar');
   results.innerHTML='<div class="sr-empty">Searching…</div>';
   meta.style.display='none';
-
+  filterBar.classList.remove('visible');
+  
+  // Pick best available search engine
   let spec=S.translation1;
   if(spec.startsWith('ba:')){
     if(S.esvApiKey)spec='esv:esv';
@@ -1288,34 +1453,64 @@ async function doSearch(query){
       return;
     }
   }
-
+  
+  // Expand to related keywords if thematic
+  const keywords=expandQuery(query);
   const[src,...rest]=spec.split(':');const id=rest.join(':');
+  
   try{
+    let items=[];
     if(src==='esv'&&S.esvApiKey){
-      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=100`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
-      if(!r.ok)throw new Error(`ESV search error (${r.status})`);
-      const data=await r.json();
-      searchAllItems=(data.results||[]).map(res=>({
-        ref:res.reference,
-        text:(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||''
-      }));
-      renderSearchResults(searchAllItems,query,data.total_results||searchAllItems.length,'ESV');
+      // Fetch for each keyword, deduplicate by reference
+      const seen=new Set();
+      const fetches=keywords.map(kw=>
+        fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(kw)}&page-size=100`,
+          {headers:{Authorization:`Token ${S.esvApiKey}`}})
+          .then(r=>r.ok?r.json():null).catch(()=>null)
+      );
+      const results_data=await Promise.all(fetches);
+      results_data.forEach(data=>{
+        if(!data)return;
+        (data.results||[]).forEach(res=>{
+          const ref=res.reference;
+          if(seen.has(ref))return;
+          seen.add(ref);
+          const text=(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||'';
+          if(text)items.push({ref,text});
+        });
+      });
+      searchTransLabel='ESV';
     }else if(src==='ab'&&S.apiKey){
-      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=100&sort=relevance`,{headers:{'api-key':S.apiKey}});
-      if(!r.ok)throw new Error(`Search error (${r.status})`);
-      const data=await r.json();
-      searchAllItems=(data.data?.verses||[]).map(v=>({
-        ref:v.reference,
-        text:(v.text||'').replace(/<[^>]+>/g,'')
-      }));
-      const total=data.data?.total||searchAllItems.length;
-      renderSearchResults(searchAllItems,query,total,translLabel(spec));
+      const seen=new Set();
+      const fetches=keywords.map(kw=>
+        fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(kw)}&limit=100&sort=relevance`,
+          {headers:{'api-key':S.apiKey}})
+          .then(r=>r.ok?r.json():null).catch(()=>null)
+      );
+      const results_data=await Promise.all(fetches);
+      results_data.forEach(data=>{
+        if(!data)return;
+        (data.data?.verses||[]).forEach(v=>{
+          const ref=v.reference;
+          if(seen.has(ref))return;
+          seen.add(ref);
+          const text=(v.text||'').replace(/<[^>]+>/g,'');
+          if(text)items.push({ref,text});
+        });
+      });
+      searchTransLabel=translLabel(spec);
     }else{
       results.innerHTML='<div class="sr-empty">No search-capable translation available.<br>Add keys via Settings → App Info.</div>';
+      return;
     }
+    
+    searchAllItems=items;
+    document.getElementById('searchMetaTrans').textContent=searchTransLabel;
+    buildFilterChips(items);
+    renderItems();
+    
   }catch(err){
     results.innerHTML=`<div class="sr-empty">${esc(err.message)}</div>`;
-    meta.style.display='none';
   }
 }
 
@@ -1658,28 +1853,52 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('vabClear').addEventListener('click',clearSelection);
 
   // Search
-  document.getElementById('searchBtn').addEventListener('click',()=>{const so=document.getElementById('searchOverlay');so.classList.toggle('open');if(so.classList.contains('open'))setTimeout(()=>document.getElementById('searchInput').focus(),100);});
-  document.getElementById('searchClose').addEventListener('click',()=>document.getElementById('searchOverlay').classList.remove('open'));
-  document.getElementById('searchInput').addEventListener('input',e=>{
+  const searchOverlay=document.getElementById('searchOverlay');
+  const searchInputEl=document.getElementById('searchInput');
+  function openSearch(){
+    searchOverlay.classList.add('open');
+    setTimeout(()=>searchInputEl.focus(),100);
+    renderRecentSearches();
+  }
+  document.getElementById('searchBtn').addEventListener('click',()=>{
+    searchOverlay.classList.contains('open')?searchOverlay.classList.remove('open'):openSearch();
+  });
+  document.getElementById('searchClose').addEventListener('click',()=>searchOverlay.classList.remove('open'));
+  
+  searchInputEl.addEventListener('input',e=>{
     clearTimeout(searchTimer);
     const q=e.target.value.trim();
-    if(q.length<2){
-      document.getElementById('searchResults').innerHTML='<div class="sr-empty">Type to search the Bible</div>';
+    const recentWrap=document.getElementById('searchRecent');
+    const refHint=document.getElementById('searchRefHint');
+    
+    if(!q){
+      document.getElementById('searchResults').innerHTML='<div class="sr-empty">Search the Bible by keyword,<br>phrase, or reference</div>';
       document.getElementById('searchMeta').style.display='none';
+      document.getElementById('searchFilterBar').classList.remove('visible');
+      refHint.classList.remove('visible');
+      recentWrap.style.display='flex';
+      renderRecentSearches();
       return;
     }
-    searchTimer=setTimeout(()=>doSearch(q),400);
+    recentWrap.style.display='none';
+    
+    // Reference detection
+    const ref=detectReference(q);
+    if(ref){
+      refHint.classList.add('visible');
+      document.getElementById('searchRefText').textContent=`${ref.book} ${ref.ch}${ref.v>1?':'+ref.v:''}`;
+      refHint.onclick=()=>{S.book=ref.book;S.chapter=ref.ch;closeAll();render(true);};
+    }else{
+      refHint.classList.remove('visible');
+    }
+    
+    if(q.length>=2)searchTimer=setTimeout(()=>doSearch(q),400);
   });
-  // Filter chips
-  document.getElementById('searchFilters')?.querySelectorAll('.sf-chip').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      document.getElementById('searchFilters').querySelectorAll('.sf-chip').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      searchFilter=btn.dataset.filter;
-      searchPage=0;
-      const q=document.getElementById('searchInput').value.trim();
-      if(q.length>=2&&searchAllItems.length)renderSearchResults(searchAllItems,q,null,document.getElementById('searchMetaTrans')?.textContent||'');
-    });
+  
+  // Keyboard search shortcut
+  document.addEventListener('keydown',e=>{
+    if(['SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;
+    if(e.key==='/')  {e.preventDefault();openSearch();}
   });
 
   // Bookmarks
@@ -1735,7 +1954,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.addEventListener('keydown',e=>{
     if(['SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;
     if(e.key==='ArrowRight')step(1);if(e.key==='ArrowLeft')step(-1);
-    if(e.key==='/')  {e.preventDefault();document.getElementById('searchOverlay').classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),100);}
     if(e.key==='Escape'){clearSelection();closeAll();}
   });
 
