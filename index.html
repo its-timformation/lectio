@@ -206,17 +206,17 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .status-msg{text-align:center;font-family:var(--display);font-style:italic;font-weight:300;color:var(--text-muted);padding:72px 0;font-size:1.2rem;}
 
 /* ── Settings panel ── */
-.settings-panel{position:fixed;inset:0 0 0 auto;width:300px;max-width:92vw;background:var(--bg-sub);border-left:1px solid var(--border);padding:0 0 calc(48px + var(--sab));overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1),background-color .5s;z-index:60;box-shadow:-8px 0 32px var(--shadow);}
+.settings-panel{position:fixed;inset:0 0 0 auto;width:300px;max-width:92vw;background:var(--bg-sub);border-left:1px solid var(--border);padding:0;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1),background-color .5s;z-index:60;box-shadow:-8px 0 32px var(--shadow);}
 .settings-panel.open{transform:translateX(0);}
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 13px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-sub);z-index:1;transition:background-color .5s;}
 .settings-header h2{font-family:var(--sans);font-weight:300;font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--text-muted);margin:0;}
 .settings-close{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--text-soft);cursor:pointer;font-family:var(--sans);font-size:.64rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;transition:all .2s;display:flex;align-items:center;gap:5px;}
-.settings-footer{display:none;}
-.settings-footer-close{width:100%;background:none;border:none;border-top:1px solid var(--border);padding:14px 20px calc(14px + var(--sab));font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;transition:color .2s,background .2s;}
+.settings-footer{display:none;flex-shrink:0;}
+.settings-footer-close{width:100%;background:var(--bg-sub);border:none;border-top:1px solid var(--border);padding:0 20px;font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;height:calc(52px + var(--sab));padding-bottom:var(--sab);transition:color .2s,background .2s;}
 .settings-footer-close:hover{color:var(--text);background:var(--bg-sub);}
 .settings-close:hover{border-color:var(--text-muted);color:var(--text);}
 .settings-close svg{width:11px;height:11px;}
-.settings-body{padding:20px 20px 0;}
+.settings-body{padding:20px 20px 24px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .s-sec{margin-bottom:24px;}
 .s-sec h3{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;}
 .s-field{display:flex;justify-content:space-between;align-items:center;padding:8px 0;min-height:44px;}
@@ -277,22 +277,39 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 /* ── Search overlay ── */
 .search-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;flex-direction:column;}
 .search-overlay.open{opacity:1;pointer-events:auto;}
-.search-bar{padding:calc(16px + var(--sat)) 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+/* Search bar */
+.search-bar{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;flex-shrink:0;background:var(--bg);}
+.search-bar-row1{display:flex;align-items:center;gap:10px;}
 .search-input-wrap{position:relative;flex:1;}
-.search-input{width:100%;background:var(--bg-sub);border:1px solid var(--border);border-radius:4px;padding:11px 16px 11px 40px;font-family:var(--serif);font-size:1rem;color:var(--text);outline:none;}
+.search-input{width:100%;background:var(--bg-sub);border:1px solid var(--border);border-radius:24px;padding:10px 16px 10px 40px;font-family:var(--sans);font-size:1rem;font-weight:300;color:var(--text);outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--text-muted);}
 .search-input::placeholder{color:var(--text-muted);}
-.search-icon-inner{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+.search-icon-inner{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
 .search-icon-inner svg{width:15px;height:15px;}
-.search-close-btn{background:none;border:none;font-family:var(--sans);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:10px;min-height:44px;}
+.search-close-btn{background:none;border:none;font-family:var(--sans);font-size:.64rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;padding:8px 4px;min-height:44px;white-space:nowrap;flex-shrink:0;transition:color .2s;}
 .search-close-btn:hover{color:var(--text);}
-.search-hint{font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--text-muted);padding:8px 20px 0;}
-.search-results{flex:1;overflow-y:auto;padding:8px 16px 40px;}
-.sr-item{padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:3px;transition:background .12s;}
+/* Filter chips */
+.search-filters{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.search-filters::-webkit-scrollbar{display:none;}
+.sf-chip{background:none;border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-family:var(--sans);font-size:.65rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;min-height:32px;}
+.sf-chip.active{background:var(--hi);border-color:var(--hi);color:#fff;}
+/* Results meta bar */
+.search-meta{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);min-height:36px;}
+.search-meta-count{font-family:var(--sans);font-size:.68rem;font-weight:300;color:var(--text-muted);}
+.search-meta-trans{font-family:var(--sc);font-size:.65rem;letter-spacing:.14em;color:var(--hi);}
+/* Results list */
+.search-results{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 40px;}
+.sr-item{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;display:flex;flex-direction:column;gap:6px;}
 .sr-item:hover{background:var(--bg-sub);}
 .sr-item:last-child{border-bottom:none;}
-.sr-ref{font-family:var(--sc);font-size:.66rem;letter-spacing:.2em;color:var(--hi);margin-bottom:4px;}
-.sr-text{font-family:var(--serif);font-size:.95rem;color:var(--text-soft);line-height:1.55;}
-.sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:48px 20px;font-size:1.1rem;}
+.sr-item-header{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.sr-ref{font-family:var(--sc);font-size:.7rem;letter-spacing:.2em;color:var(--hi);flex-shrink:0;}
+.sr-book{font-family:var(--sans);font-size:.62rem;font-weight:300;color:var(--text-muted);letter-spacing:.08em;}
+.sr-text{font-family:var(--serif);font-size:1rem;color:var(--text-soft);line-height:1.65;}
+.sr-text mark{background:rgba(184,114,46,.18);color:var(--text);border-radius:2px;padding:0 2px;}
+.sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:64px 20px;font-size:1.2rem;line-height:1.6;}
+.sr-load-more{display:block;width:100%;padding:14px;background:none;border:none;border-top:1px solid var(--border);font-family:var(--sans);font-size:.7rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:color .2s,background .2s;min-height:52px;}
+.sr-load-more:hover{color:var(--text);background:var(--bg-sub);}
 
 /* ── Bookmarks modal ── */
 .bk-item{padding:14px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
@@ -372,15 +389,15 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   .top-trans-label{font-size:.7rem;}
   .top-trans-arrow{display:none;}
   .settings-panel{width:100%;max-width:100%;border-left:none;border-top:1px solid var(--border);}
-  .settings-footer{display:block;position:sticky;bottom:0;background:var(--bg-sub);}
-  .settings-body{padding-bottom:0;}
+  .settings-footer{display:flex;}
+  .settings-body{padding-bottom:24px;}
   .key-input,.search-input,select{font-size:16px !important;}
   .modal-overlay{padding:0;align-items:flex-end;}
   .modal-card{max-width:100%;width:100%;border-radius:16px 16px 0 0;border-bottom:none;padding:28px 20px calc(28px + var(--sab));max-height:88vh;}
   .modal-card.wide{max-width:100%;}
   .plan-tab{padding:8px 10px 10px;font-size:.6rem;letter-spacing:.1em;}
-  .search-bar{padding:calc(12px + var(--sat)) max(14px,var(--sal)) 12px;}
-  .search-results{padding:8px 14px calc(40px + var(--sab));}
+  .search-bar{padding:calc(10px + var(--sat)) max(14px,var(--sal)) 10px;}
+  .search-results{padding:0 0 calc(64px + var(--sab));}
   .book-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
   .verse-action-bar{bottom:calc(52px + var(--sab));transform:translateY(calc(100% + 52px + var(--sab) + 20px));}
   .verse-action-bar.open{transform:translateY(0);}
@@ -628,14 +645,31 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <!-- Search -->
 <div class="search-overlay" id="searchOverlay">
   <div class="search-bar">
-    <div class="search-input-wrap">
-      <span class="search-icon-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
-      <input type="search" class="search-input" id="searchInput" placeholder="Search the Bible…" autocomplete="off" spellcheck="false">
+    <div class="search-bar-row1">
+      <div class="search-input-wrap">
+        <span class="search-icon-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+        <input type="search" class="search-input" id="searchInput" placeholder="Search the Bible…" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="search-close-btn" id="searchClose">Close</button>
     </div>
-    <button class="search-close-btn" id="searchClose">Close</button>
+    <!-- Book filter chips -->
+    <div class="search-filters" id="searchFilters">
+      <button class="sf-chip active" data-filter="all">All</button>
+      <button class="sf-chip" data-filter="old">Old Testament</button>
+      <button class="sf-chip" data-filter="new">New Testament</button>
+      <button class="sf-chip" data-filter="gospels">Gospels</button>
+      <button class="sf-chip" data-filter="epistles">Epistles</button>
+      <button class="sf-chip" data-filter="poetry">Poetry</button>
+      <button class="sf-chip" data-filter="prophecy">Prophecy</button>
+    </div>
   </div>
-  <div class="search-hint" id="searchHint"></div>
-  <div class="search-results" id="searchResults"><div class="sr-empty">Type to search. Works with ESV and API.Bible translations.</div></div>
+  <div class="search-meta" id="searchMeta" style="display:none">
+    <span class="search-meta-count" id="searchMetaCount"></span>
+    <span class="search-meta-trans" id="searchMetaTrans"></span>
+  </div>
+  <div class="search-results" id="searchResults">
+    <div class="sr-empty">Type to search the Bible</div>
+  </div>
 </div>
 
 <!-- Bookmarks -->
@@ -1127,67 +1161,162 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 function fallbackCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');showToast('Copied!');}catch(e){showToast('Copy unavailable');}document.body.removeChild(ta);}
 
 // ═══ SEARCH ═════════════════════════════════════
+
+// ═══ SEARCH ══════════════════════════════════════
+const BOOK_GROUPS={
+  all:null,
+  old:['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi'],
+  new:['Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude','Revelation'],
+  gospels:['Matthew','Mark','Luke','John'],
+  epistles:['Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude'],
+  poetry:['Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Lamentations'],
+  prophecy:['Isaiah','Jeremiah','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi','Revelation']
+};
+let searchAllItems=[];  // full unfiltered results
+let searchFilter='all'; // current filter
+let searchPage=0;       // pagination
+const SEARCH_PAGE_SIZE=15;
+
 let searchTimer=null;
 function parseRef(refStr){
   if(!refStr)return null;
-  // Strip trailing parenthetical e.g. "(ESV)" or "(NLT)"
-  const clean=refStr.replace(/\s*\([^)]+\)\s*$/, '').trim();
-  // Try longest book name match first to handle "1 Corinthians" before "Corinthians"
+  const clean=refStr.replace(/\s*\([^)]+\)\s*$/,'').trim();
   const sorted=[...ALL_BOOKS].sort((a,b)=>b[0].length-a[0].length);
   for(const[name]of sorted){
     if(clean.startsWith(name)){
       const rest=clean.slice(name.length).trim();
-      // Format: "3:16" or "3:16-18" or just "3"
       const m=rest.match(/^(\d+)(?::(\d+))?/);
       if(m)return{book:name,ch:parseInt(m[1]),v:m[2]?parseInt(m[2]):1};
     }
   }
   return null;
 }
-async function doSearch(query){
-  const hint=document.getElementById('searchHint');
-  const results=document.getElementById('searchResults');
-  results.innerHTML='<div class="sr-empty">Searching…</div>';
 
-  // If on a free (ba:) translation, automatically fall back to best search-capable one
+function highlightQuery(text,query){
+  if(!query||!text)return esc(text||'');
+  const words=query.trim().split(/\s+/).filter(w=>w.length>2);
+  if(!words.length)return esc(text);
+  const escaped=words.map(w=>w.replace(/[.*+?^${}()|\[\]\\]/g,'\\$&')).join('|'); const re=new RegExp(`(${escaped})`, 'gi');
+  return esc(text).replace(re,'<mark>$1</mark>');
+}
+
+function getBookFromRef(ref){
+  const sorted=[...ALL_BOOKS].sort((a,b)=>b[0].length-a[0].length);
+  for(const[name]of sorted){if(ref.startsWith(name))return name;}
+  return null;
+}
+
+function renderSearchResults(items,query,totalCount,transLabel){
+  const results=document.getElementById('searchResults');
+  const meta=document.getElementById('searchMeta');
+  const metaCount=document.getElementById('searchMetaCount');
+  const metaTrans=document.getElementById('searchMetaTrans');
+
+  if(!items.length){
+    meta.style.display='none';
+    results.innerHTML=`<div class="sr-empty">No results found for<br><em>"${esc(query)}"</em></div>`;
+    return;
+  }
+
+  // Apply filter
+  const filter=searchFilter;
+  const filterBooks=BOOK_GROUPS[filter];
+  const filtered=filterBooks?items.filter(it=>{const b=getBookFromRef(it.ref||'');return b&&filterBooks.includes(b);}):items;
+
+  // Paginate
+  const page=searchPage;
+  const start=page*SEARCH_PAGE_SIZE;
+  const paginated=filtered.slice(start,start+SEARCH_PAGE_SIZE);
+  const hasMore=filtered.length>start+SEARCH_PAGE_SIZE;
+
+  // Meta bar
+  meta.style.display='flex';
+  const showing=Math.min(filtered.length,start+SEARCH_PAGE_SIZE);
+  metaCount.textContent=totalCount?`${showing} of ${filtered.length}${filter!=='all'?' (filtered)':''} · ${totalCount} total`:`${showing} of ${filtered.length}${filter!=='all'?' (filtered)':''}`;
+  metaTrans.textContent=transLabel;
+
+  const html=paginated.map(it=>{
+    const ref=it.ref||'';
+    const txt=it.text||'';
+    const book=getBookFromRef(ref)||'';
+    const parsed=parseRef(ref);
+    const chapterRef=parsed?`${parsed.book} ${parsed.ch}`:'';
+    // Show ~200 chars of context with query highlighted
+    const snippet=txt.slice(0,220)+(txt.length>220?'…':'');
+    return`<div class="sr-item" data-ref="${esc(ref)}">
+      <div class="sr-item-header">
+        <span class="sr-ref">${esc(ref)}</span>
+        <span class="sr-book">${esc(book)}</span>
+      </div>
+      <div class="sr-text">${highlightQuery(snippet,query)}</div>
+    </div>`;
+  }).join('');
+
+  results.innerHTML=page===0?html:results.innerHTML.replace(/<button[^>]*sr-load-more[^>]*>.*?<\/button>/,'')+html;
+
+  if(hasMore){
+    const btn=document.createElement('button');
+    btn.className='sr-load-more';
+    btn.textContent=`Load more (${filtered.length-showing} remaining)`;
+    btn.addEventListener('click',()=>{searchPage++;renderSearchResults(items,query,totalCount,transLabel);});
+    results.appendChild(btn);
+  }
+
+  results.querySelectorAll('.sr-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const p=parseRef(el.dataset.ref);
+      if(p){S.book=p.book;S.chapter=p.ch;closeAll();render(true);}
+    });
+  });
+}
+
+async function doSearch(query){
+  const results=document.getElementById('searchResults');
+  const meta=document.getElementById('searchMeta');
+  searchPage=0;
+  results.innerHTML='<div class="sr-empty">Searching…</div>';
+  meta.style.display='none';
+
   let spec=S.translation1;
   if(spec.startsWith('ba:')){
-    if(S.esvApiKey){
-      spec='esv:esv';
-    }else if(S.apiKey&&S.apiBibles.length){
+    if(S.esvApiKey)spec='esv:esv';
+    else if(S.apiKey&&S.apiBibles.length){
       const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
       spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
     }else{
-      results.innerHTML='<div class="sr-empty">Search needs an ESV or API.Bible key — add them via Settings → App Info &amp; Keys.</div>';
-      hint.textContent='';return;
+      results.innerHTML='<div class="sr-empty">Search needs an ESV or API.Bible key.<br>Add them via Settings → App Info.</div>';
+      return;
     }
   }
 
   const[src,...rest]=spec.split(':');const id=rest.join(':');
   try{
-    let items=[];
     if(src==='esv'&&S.esvApiKey){
-      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=15`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
+      const r=await fetch(`https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(query)}&page-size=100`,{headers:{Authorization:`Token ${S.esvApiKey}`}});
       if(!r.ok)throw new Error(`ESV search error (${r.status})`);
       const data=await r.json();
-      items=(data.results||[]).map(res=>({ref:res.reference,text:(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||''}));
-      hint.textContent=`${data.total_results||0} results · ESV`;
+      searchAllItems=(data.results||[]).map(res=>({
+        ref:res.reference,
+        text:(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||''
+      }));
+      renderSearchResults(searchAllItems,query,data.total_results||searchAllItems.length,'ESV');
     }else if(src==='ab'&&S.apiKey){
-      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=15&sort=relevance`,{headers:{'api-key':S.apiKey}});
+      const r=await fetch(`https://rest.api.bible/v1/bibles/${id}/search?query=${encodeURIComponent(query)}&limit=100&sort=relevance`,{headers:{'api-key':S.apiKey}});
       if(!r.ok)throw new Error(`Search error (${r.status})`);
       const data=await r.json();
-      items=(data.data?.verses||[]).map(v=>({ref:v.reference,text:(v.text||'').replace(/<[^>]+>/g,'')}));
-      hint.textContent=`${data.data?.total||'?'} results · ${translLabel(spec)}`;
+      searchAllItems=(data.data?.verses||[]).map(v=>({
+        ref:v.reference,
+        text:(v.text||'').replace(/<[^>]+>/g,'')
+      }));
+      const total=data.data?.total||searchAllItems.length;
+      renderSearchResults(searchAllItems,query,total,translLabel(spec));
     }else{
-      results.innerHTML='<div class="sr-empty">No search-capable translation available. Add keys via Settings → App Info.</div>';
-      hint.textContent='';return;
+      results.innerHTML='<div class="sr-empty">No search-capable translation available.<br>Add keys via Settings → App Info.</div>';
     }
-    if(!items.length){results.innerHTML='<div class="sr-empty">No results found</div>';return;}
-    results.innerHTML=items.map(it=>`<div class="sr-item" data-ref="${esc(it.ref)}"><div class="sr-ref">${esc(it.ref)}</div><div class="sr-text">${esc(it.text.slice(0,180)+(it.text.length>180?'…':''))}</div></div>`).join('');
-    results.querySelectorAll('.sr-item').forEach(el=>{
-      el.addEventListener('click',()=>{const p=parseRef(el.dataset.ref);if(p){S.book=p.book;S.chapter=p.ch;closeAll();render(true);}});
-    });
-  }catch(err){results.innerHTML=`<div class="sr-empty">${esc(err.message)}</div>`;hint.textContent='';}
+  }catch(err){
+    results.innerHTML=`<div class="sr-empty">${esc(err.message)}</div>`;
+    meta.style.display='none';
+  }
 }
 
 // ═══ READING PLANS ══════════════════════════════
@@ -1531,7 +1660,27 @@ document.addEventListener('DOMContentLoaded',async()=>{
   // Search
   document.getElementById('searchBtn').addEventListener('click',()=>{const so=document.getElementById('searchOverlay');so.classList.toggle('open');if(so.classList.contains('open'))setTimeout(()=>document.getElementById('searchInput').focus(),100);});
   document.getElementById('searchClose').addEventListener('click',()=>document.getElementById('searchOverlay').classList.remove('open'));
-  document.getElementById('searchInput').addEventListener('input',e=>{clearTimeout(searchTimer);const q=e.target.value.trim();if(q.length<2){document.getElementById('searchResults').innerHTML='<div class="sr-empty">Type to search…</div>';document.getElementById('searchHint').textContent='';return;}searchTimer=setTimeout(()=>doSearch(q),400);});
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    clearTimeout(searchTimer);
+    const q=e.target.value.trim();
+    if(q.length<2){
+      document.getElementById('searchResults').innerHTML='<div class="sr-empty">Type to search the Bible</div>';
+      document.getElementById('searchMeta').style.display='none';
+      return;
+    }
+    searchTimer=setTimeout(()=>doSearch(q),400);
+  });
+  // Filter chips
+  document.getElementById('searchFilters')?.querySelectorAll('.sf-chip').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.getElementById('searchFilters').querySelectorAll('.sf-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      searchFilter=btn.dataset.filter;
+      searchPage=0;
+      const q=document.getElementById('searchInput').value.trim();
+      if(q.length>=2&&searchAllItems.length)renderSearchResults(searchAllItems,q,null,document.getElementById('searchMetaTrans')?.textContent||'');
+    });
+  });
 
   // Bookmarks
   document.getElementById('bookmarksBtn').addEventListener('click',()=>{renderBookmarksModal();document.getElementById('bookmarksModal').classList.toggle('open');});
