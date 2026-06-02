@@ -98,6 +98,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .icon-btn:hover{border-color:var(--border);color:var(--text);}
 .icon-btn svg{width:15px;height:15px;}
 .icon-btn.active{color:var(--hi);border-color:var(--hi);}
+/* ── Study Bible crosslink (desktop only) ── */
+.study-bible-link{display:none;}
+@media(min-width:900px){
+  .study-bible-link{display:flex;align-items:center;gap:5px;padding:0 10px;height:30px;border-radius:15px;border:1px solid var(--border);background:var(--bg-sub);transition:border-color .2s;user-select:none;text-decoration:none;margin-right:4px;}
+  .study-bible-link:hover{border-color:var(--text-muted);}
+  .study-bible-link span{font-family:var(--sc);font-weight:400;font-size:.72rem;letter-spacing:.18em;color:var(--text-muted);line-height:1;}
+  .study-bible-link em{font-family:var(--sans);font-size:.58rem;color:var(--text-muted);opacity:.55;font-style:normal;line-height:1;}
+}
 
 /* ── Page & reading ── */
 .page{padding-top:calc(var(--bar-h) + var(--sat));padding-bottom:96px;min-height:100vh;}
@@ -440,6 +448,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   </div>
   <div class="top-mid"><span class="top-wordmark top-wordmark-centre">Lectio</span></div>
   <div class="top-right">
+    <a class="study-bible-link" href="https://bible.honest-resources.com" target="_blank" rel="noopener" title="Open Study Bible">
+      <span>Study Bible</span>
+      <em>↗</em>
+    </a>
     <span class="top-wordmark top-wordmark-right">Lectio</span>
     <button class="icon-btn" id="planBtn" title="Reading Plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></button>
     <button class="icon-btn" id="searchBtn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
