@@ -489,6 +489,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="vab-row2">
     <button class="vab-btn" id="vabBookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save</button>
     <button class="vab-btn" id="vabCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</button>
+    <button class="vab-btn" id="vabShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button>
     <button class="vab-btn vab-clear" id="vabClear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>Clear</button>
   </div>
 </div>
@@ -1155,6 +1156,32 @@ function copySelected(){
     navigator.clipboard.writeText(full).then(()=>showToast('Copied!')).catch(()=>fallbackCopy(full));
   }else fallbackCopy(full);
   clearSelection();
+}
+
+async function shareSelected(){
+  const sorted=[...S.selectedVerses].map(Number).sort((a,b)=>a-b);
+  const firstV=sorted[0];
+  const lines=[];
+  sorted.forEach(v=>{
+    const el=document.querySelector(`[data-v="${v}"]`);
+    const txt=(el?.dataset.txt||'').trim();
+    if(txt)lines.push(txt);
+  });
+  const text=S.flowingProse?lines.join(' '):lines.join('\n');
+  const ref=selectedReference();
+  const tl=translLabel(S.translation1);
+  const title=`${ref} — ${tl}`;
+  const url=`${window.location.origin}/?book=${encodeURIComponent(S.book)}&ch=${S.chapter}&v=${firstV}`;
+  if(navigator.share){
+    try{
+      await navigator.share({title,text,url});
+      clearSelection();
+    }catch(e){if(e.name!=='AbortError')showToast('Share failed');}
+  }else{
+    if(navigator.clipboard&&window.isSecureContext){
+      navigator.clipboard.writeText(url).then(()=>{showToast('Link copied!');clearSelection();}).catch(()=>{fallbackCopy(url);clearSelection();});
+    }else{fallbackCopy(url);clearSelection();}
+  }
 }
 
 // ═══ BOOKMARKS ══════════════════════════════════
@@ -1863,6 +1890,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.querySelectorAll('.vab-swatch').forEach(el=>{el.addEventListener('click',()=>applyHighlightToSelected(el.dataset.c));});
   document.getElementById('vabBookmark').addEventListener('click',bookmarkSelected);
   document.getElementById('vabCopy').addEventListener('click',copySelected);
+  document.getElementById('vabShare').addEventListener('click',shareSelected);
   document.getElementById('vabClear').addEventListener('click',clearSelection);
 
   // Search
@@ -1985,6 +2013,16 @@ document.addEventListener('DOMContentLoaded',async()=>{
     const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)>64&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?step(1):step(-1);}
   },{passive:true});
+
+  // Deep link: read ?book=John&ch=3&v=16 from shared URLs
+  try{
+    const params=new URLSearchParams(window.location.search);
+    const pBook=params.get('book');
+    const pCh=parseInt(params.get('ch'));
+    if(pBook&&pCh&&ALL_BOOKS.find(b=>b[0]===pBook)){
+      S.book=pBook;S.chapter=pCh;
+    }
+  }catch(e){}
 
   render(true);
 });
