@@ -1138,18 +1138,19 @@ function bookmarkSelected(){
 }
 
 function copySelected(){
-  const lines=[];
   const sorted=[...S.selectedVerses].map(Number).sort((a,b)=>a-b);
+  const lines=[];
   sorted.forEach(v=>{
     const el=document.querySelector(`[data-v="${v}"]`);
     const txt=(el?.dataset.txt||'').trim();
     if(!txt)return;
-    // Respect verse numbers setting — only include number if turned on
-    if(S.showVerseNums)lines.push(`[${v}] ${txt}`);
+    if(S.showVerseNums&&!S.flowingProse)lines.push(`[${v}] ${txt}`);
     else lines.push(txt);
   });
   const ref=`${selectedReference()} (${translLabel(S.translation1)})`;
-  const full=lines.join('\n')+'\n\n— '+ref;
+  // Flowing prose: join with spaces; verse-per-line: one per line
+  const body=S.flowingProse?lines.join(' '):lines.join('\n');
+  const full=body+'\n\n— '+ref;
   if(navigator.clipboard&&window.isSecureContext){
     navigator.clipboard.writeText(full).then(()=>showToast('Copied!')).catch(()=>fallbackCopy(full));
   }else fallbackCopy(full);
