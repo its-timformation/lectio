@@ -1558,6 +1558,7 @@ async function doSearch(query){
     }
 
     searchAllItems=items;
+    console.log('searchAllItems:', searchAllItems.length, searchAllItems[0]);
     document.getElementById('searchMetaTrans').textContent=searchTransLabel;
     buildFilterChips(items);
     renderItems();
