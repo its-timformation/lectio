@@ -1494,75 +1494,66 @@ async function doSearch(query){
       const niv=S.apiBibles.find(b=>/^NIV/i.test(b.abbreviation||''));
       spec=niv?`ab:${niv.id}`:`ab:${S.apiBibles[0].id}`;
     }else{
-      resultsEl.innerHTML='<div class="sr-empty">Search needs an ESV or API.Bible key.<br>Add them via Settings → App Info.</div>';
+      resultsEl.innerHTML='<div class="sr-empty">Search needs an ESV or API.Bible key.<br>Go to Settings → App Info to add one.</div>';
       return;
     }
   }
 
+  const[src,...rest]=spec.split(':');
+  const bibleId=rest.join(':');
+
+  // Get thematic keywords silently, but only use 2 extra max
   const keywords=expandQuery(query);
-  // Limit expansion to avoid rate limiting — primary query first, then up to 2 extra
-  const searchTerms=keywords.length>1?[keywords[0],...keywords.slice(1,3)]:[keywords[0]];
-  const[src,...rest]=spec.split(':');const bibleId=rest.join(':');
-
-  async function fetchESV(term){
-    try{
-      const r=await fetch(
-        `https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(term)}&page-size=100`,
-        {headers:{Authorization:`Token ${S.esvApiKey}`}}
-      );
-      if(!r.ok)return[];
-      const d=await r.json();
-      return(d.results||[]).map(res=>({
-        ref:res.reference,
-        text:(res.verses||[]).map(v=>v.text||v).join(' ').replace(/<[^>]+>/g,'')||res.passage||''
-      }));
-    }catch(e){return[];}
-  }
-
-  async function fetchAPIBible(term){
-    try{
-      const r=await fetch(
-        `https://rest.api.bible/v1/bibles/${bibleId}/search?query=${encodeURIComponent(term)}&limit=100&sort=relevance`,
-        {headers:{'api-key':S.apiKey}}
-      );
-      if(!r.ok)return[];
-      const d=await r.json();
-      return(d.data?.verses||[]).map(v=>({
-        ref:v.reference,
-        text:(v.text||'').replace(/<[^>]+>/g,'')
-      }));
-    }catch(e){return[];}
-  }
+  const terms=keywords.length>1?keywords.slice(0,2):[query];
 
   try{
     const seen=new Set();
     let items=[];
 
-    if(src==='esv'&&S.esvApiKey){
-      // Search primary term first
-      const primary=await fetchESV(searchTerms[0]);
-      primary.forEach(it=>{if(!seen.has(it.ref)&&it.text){seen.add(it.ref);items.push(it);}});
-      // Then expand terms sequentially to avoid rate limiting
-      for(let i=1;i<searchTerms.length;i++){
-        if(items.length>=150)break;
-        await new Promise(r=>setTimeout(r,300)); // small delay between requests
-        const extra=await fetchESV(searchTerms[i]);
-        extra.forEach(it=>{if(!seen.has(it.ref)&&it.text){seen.add(it.ref);items.push(it);}});
+    for(let i=0;i<terms.length;i++){
+      const term=terms[i];
+      if(i>0)await new Promise(r=>setTimeout(r,400)); // delay between requests
+
+      if(src==='esv'&&S.esvApiKey){
+        const r=await fetch(
+          `https://api.esv.org/v3/passage/search/?q=${encodeURIComponent(term)}&page-size=100`,
+          {headers:{Authorization:`Token ${S.esvApiKey}`}}
+        );
+        if(!r.ok){
+          if(i===0)throw new Error(`ESV API error ${r.status} — check your API key is valid for this domain`);
+          continue;
+        }
+        const d=await r.json();
+        (d.results||[]).forEach(res=>{
+          if(seen.has(res.reference))return;
+          seen.add(res.reference);
+          const text=(res.verses||[]).map(v=>v.text||'').join(' ').replace(/<[^>]+>/g,'').trim()||res.passage||'';
+          if(text)items.push({ref:res.reference,text});
+        });
+        searchTransLabel='ESV';
+
+      }else if(src==='ab'&&S.apiKey){
+        const r=await fetch(
+          `https://rest.api.bible/v1/bibles/${bibleId}/search?query=${encodeURIComponent(term)}&limit=100&sort=relevance`,
+          {headers:{'api-key':S.apiKey}}
+        );
+        if(!r.ok){
+          if(i===0)throw new Error(`Bible API error ${r.status} — check your API key`);
+          continue;
+        }
+        const d=await r.json();
+        (d.data?.verses||[]).forEach(v=>{
+          if(seen.has(v.reference))return;
+          seen.add(v.reference);
+          const text=(v.text||'').replace(/<[^>]+>/g,'').trim();
+          if(text)items.push({ref:v.reference,text});
+        });
+        searchTransLabel=translLabel(spec);
+
+      }else{
+        resultsEl.innerHTML='<div class="sr-empty">No search-capable translation found.<br>Add your API keys via Settings → App Info.</div>';
+        return;
       }
-      searchTransLabel='ESV';
-    }else if(src==='ab'&&S.apiKey){
-      const primary=await fetchAPIBible(searchTerms[0]);
-      primary.forEach(it=>{if(!seen.has(it.ref)&&it.text){seen.add(it.ref);items.push(it);}});
-      for(let i=1;i<searchTerms.length;i++){
-        if(items.length>=150)break;
-        await new Promise(r=>setTimeout(r,300));
-        const extra=await fetchAPIBible(searchTerms[i]);
-        extra.forEach(it=>{if(!seen.has(it.ref)&&it.text){seen.add(it.ref);items.push(it);}});
-      }
-      searchTransLabel=translLabel(spec);
-    }else{
-      resultsEl.innerHTML='<div class="sr-empty">No search-capable translation available.<br>Add keys via Settings → App Info.</div>';
-      return;
     }
 
     searchAllItems=items;
@@ -1571,6 +1562,7 @@ async function doSearch(query){
     renderItems();
 
   }catch(err){
+    console.error('Search error:',err);
     resultsEl.innerHTML=`<div class="sr-empty">${esc(err.message)}</div>`;
     meta.style.display='none';
   }
