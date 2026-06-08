@@ -300,8 +300,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .search-recent-label{font-family:var(--sans);font-size:.6rem;font-weight:400;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-right:2px;}
 .sr-recent-chip{background:var(--bg-sub);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--text-soft);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
 .sr-recent-chip:hover{border-color:var(--text-muted);color:var(--text);}
-.sr-recent-del{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.8rem;line-height:1;padding:0;margin-left:2px;opacity:.6;}
-.sr-recent-del:hover{opacity:1;}
 /* Reference shortcut */
 .search-ref-hint{display:none;padding:10px 16px;background:var(--bg-sub);border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;flex-shrink:0;}
 .search-ref-hint:hover{background:var(--border);}
@@ -1287,22 +1285,11 @@ function renderRecentSearches(){
   if(!recent.length){wrap.style.display='none';return;}
   wrap.style.display='flex';
   wrap.innerHTML=`<span class="search-recent-label">Recent</span>`+
-    recent.map(q=>`<span class="sr-recent-chip" data-q="${esc(q)}">
-      ${esc(q)}
-      <button class="sr-recent-del" data-q="${esc(q)}" title="Remove">×</button>
-    </span>`).join('');
+    recent.map(q=>`<span class="sr-recent-chip" data-q="${esc(q)}">${esc(q)}</span>`).join('');
   wrap.querySelectorAll('.sr-recent-chip').forEach(el=>{
-    el.addEventListener('click',e=>{
-      if(e.target.classList.contains('sr-recent-del'))return;
+    el.addEventListener('click',()=>{
       document.getElementById('searchInput').value=el.dataset.q;
       doSearch(el.dataset.q);
-    });
-  });
-  wrap.querySelectorAll('.sr-recent-del').forEach(btn=>{
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      removeRecentSearch(btn.dataset.q);
-      renderRecentSearches();
     });
   });
 }
