@@ -320,9 +320,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 .search-meta-trans{font-family:var(--sc);font-size:.65rem;letter-spacing:.14em;color:var(--hi);}
 /* Results */
 .search-results{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
-.sr-item{padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.sr-item{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;max-width:var(--read-width);margin:0 auto;}
 .sr-item:hover{background:var(--bg-sub);}
-.sr-ref{font-family:var(--sc);font-size:.7rem;letter-spacing:.18em;color:var(--hi);display:block;margin-bottom:5px;}
+.sr-ref{font-family:var(--sc);font-size:.78rem;letter-spacing:.18em;color:var(--hi);display:block;margin-bottom:6px;}
 .sr-text{font-family:var(--serif);font-size:1rem;color:var(--text-soft);line-height:1.7;}
 .sr-text mark{background:rgba(184,114,46,.2);color:var(--text);border-radius:2px;padding:0 2px;font-style:normal;}
 .sr-empty{text-align:center;font-family:var(--display);font-style:italic;color:var(--text-muted);padding:64px 20px;font-size:1.2rem;line-height:1.8;}
@@ -1478,7 +1478,7 @@ async function doSearch(query){
   searchRenderedCount=0;
   if(searchObserver){searchObserver.disconnect();searchObserver=null;}
   addRecentSearch(query);
-  console.log('doSearch spec:', S.translation1, 'esvKey:', S.esvApiKey);
+
 
   const resultsEl=document.getElementById('searchResults');
   const meta=document.getElementById('searchMeta');
@@ -1525,7 +1525,7 @@ async function doSearch(query){
           continue;
         }
         const d=await r.json();
-        console.log('ESV raw result[0]:', JSON.stringify(d.results?.[0]));
+
         (d.results||[]).forEach(res=>{
           if(seen.has(res.reference))return;
           seen.add(res.reference);
@@ -1559,7 +1559,7 @@ async function doSearch(query){
     }
 
     searchAllItems=items;
-    console.log('searchAllItems:', searchAllItems.length, searchAllItems[0]);
+
     document.getElementById('searchMetaTrans').textContent=searchTransLabel;
     buildFilterChips(items);
     renderItems();
