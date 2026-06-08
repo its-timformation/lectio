@@ -1529,7 +1529,7 @@ async function doSearch(query){
         (d.results||[]).forEach(res=>{
           if(seen.has(res.reference))return;
           seen.add(res.reference);
-          const text=(res.passages||[]).join(' ').replace(/<[^>]+>/g,'').trim();
+          const text=(res.content||'').replace(/<[^>]+>/g,'').trim();
           if(text)items.push({ref:res.reference,text});
         });
         searchTransLabel='ESV';
