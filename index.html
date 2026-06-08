@@ -1525,6 +1525,7 @@ async function doSearch(query){
           continue;
         }
         const d=await r.json();
+        console.log('ESV raw result[0]:', JSON.stringify(d.results?.[0]));
         (d.results||[]).forEach(res=>{
           if(seen.has(res.reference))return;
           seen.add(res.reference);
