@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lectio-v2';
+const CACHE_NAME = 'lectio-v3';
 const SHELL = ['/'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
