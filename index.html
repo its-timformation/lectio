@@ -621,7 +621,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
       <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.8.5</span></div>
-      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">June 2026</span></div>
+      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">May 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
     <div class="modal-sec">
@@ -852,6 +852,7 @@ function updateTransPickerButton(){
 function openTransPickerModal(){
   renderTransPicker();
   document.getElementById('transPickerModal').classList.add('open');
+  pushModalState();
 }
 
 function renderTransPicker(){
@@ -1593,9 +1594,8 @@ function openPlanModal(){
   tabs.querySelectorAll('.plan-tab').forEach(btn=>{btn.addEventListener('click',()=>{tabs.querySelectorAll('.plan-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPlanContent(btn.dataset.plan);});});
   renderPlanContent(activePlan);
   document.getElementById('planModal').classList.add('open');
+  pushModalState();
 }
-
-// ═══ COMPARE BADGE + PICKER ═════════════════════
 function updateCompareBadge(){
   const n=S.comparedSpecs.length;
   document.getElementById('compBadge').textContent=n===0?'None':`+${n} translation${n>1?'s':''}`;
@@ -1606,6 +1606,7 @@ function updateCompareBadge(){
 function openComparePicker(){
   renderComparePicker();
   document.getElementById('compareModal').classList.add('open');
+  pushModalState();
 }
 
 function renderComparePicker(){
@@ -1673,7 +1674,7 @@ async function saveApiBibleKey(){
 
 // ═══ SELECTOR ═══════════════════════════════════
 let selMode='books',selBook=null;
-function openSelector(){selMode='books';document.getElementById('selectorOverlay').classList.add('open');renderSelector();}
+function openSelector(){selMode='books';document.getElementById('selectorOverlay').classList.add('open');pushModalState();renderSelector();}
 function closeSelector(){document.getElementById('selectorOverlay').classList.remove('open');}
 function renderSelector(){
   const stage=document.getElementById('selectorStage');
@@ -1788,6 +1789,12 @@ function closeAll(){
   closeTransSwitcher();
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
 }
+function anyPanelOpen(){
+  const ids=['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal','compareModal','transPickerModal','selectorOverlay'];
+  return ids.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('open');});
+}
+function pushModalState(){if(!anyPanelOpen())history.pushState({modal:true},'');}
+window.addEventListener('popstate',()=>{if(anyPanelOpen())closeAll();});
 
 // ═══ BOOTSTRAP ══════════════════════════════════
 document.addEventListener('DOMContentLoaded',async()=>{
@@ -1880,7 +1887,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Settings panel
   const panel=document.getElementById('settingsPanel');
-  document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
+  document.getElementById('settingsToggle').addEventListener('click',()=>{const opening=!panel.classList.contains('open');panel.classList.toggle('open');if(opening)pushModalState();});
   document.getElementById('settingsClose').addEventListener('click',()=>panel.classList.remove('open'));
   document.getElementById('settingsFooterClose')?.addEventListener('click',()=>panel.classList.remove('open'));
   document.addEventListener('click',e=>{
@@ -1903,6 +1910,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const searchInputEl=document.getElementById('searchInput');
   function openSearch(){
     searchOverlay.classList.add('open');
+    pushModalState();
     setTimeout(()=>searchInputEl.focus(),100);
     renderRecentSearches();
   }
@@ -1959,7 +1967,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Advanced + Accessibility + App Info
   [['openAdvModal','advModal','closeAdvModal'],['openAccessModal','accessModal','closeAccessModal'],['openAppInfoModal','appInfoModal','closeAppInfoModal']].forEach(([openId,modalId,closeId])=>{
-    document.getElementById(openId).addEventListener('click',()=>document.getElementById(modalId).classList.add('open'));
+    document.getElementById(openId).addEventListener('click',()=>{document.getElementById(modalId).classList.add('open');pushModalState();});
     document.getElementById(closeId).addEventListener('click',()=>document.getElementById(modalId).classList.remove('open'));
     document.getElementById(modalId).addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
   });
@@ -2005,10 +2013,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Bottom tab bar
   function setTabActive(id){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));if(id)document.getElementById(id)?.classList.add('tab-active');}
-  document.getElementById('tabSearch')?.addEventListener('click',()=>{const so=document.getElementById('searchOverlay');const was=so.classList.contains('open');closeAll();if(!was){so.classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),120);}setTabActive(was?null:'tabSearch');});
-  document.getElementById('tabBookmarks')?.addEventListener('click',()=>{const bm=document.getElementById('bookmarksModal');const was=bm.classList.contains('open');closeAll();if(!was){renderBookmarksModal();bm.classList.add('open');}setTabActive(was?null:'tabBookmarks');});
+  document.getElementById('tabSearch')?.addEventListener('click',()=>{const so=document.getElementById('searchOverlay');const was=so.classList.contains('open');closeAll();if(!was){so.classList.add('open');pushModalState();setTimeout(()=>document.getElementById('searchInput').focus(),120);}setTabActive(was?null:'tabSearch');});
+  document.getElementById('tabBookmarks')?.addEventListener('click',()=>{const bm=document.getElementById('bookmarksModal');const was=bm.classList.contains('open');closeAll();if(!was){renderBookmarksModal();bm.classList.add('open');pushModalState();}setTabActive(was?null:'tabBookmarks');});
   document.getElementById('tabPlan')?.addEventListener('click',()=>{const pm=document.getElementById('planModal');const was=pm.classList.contains('open');closeAll();if(!was)openPlanModal();setTabActive(was?null:'tabPlan');});
-  document.getElementById('tabSettings')?.addEventListener('click',()=>{const sp=document.getElementById('settingsPanel');const was=sp.classList.contains('open');closeAll();if(!was)sp.classList.add('open');setTabActive(was?null:'tabSettings');});
+  document.getElementById('tabSettings')?.addEventListener('click',()=>{const sp=document.getElementById('settingsPanel');const was=sp.classList.contains('open');closeAll();if(!was){sp.classList.add('open');pushModalState();}setTabActive(was?null:'tabSettings');});
 
   // Swipe
   let sx=0,sy=0;
