@@ -646,7 +646,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.8.7</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.8.9</span></div>
       <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">June 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
@@ -772,7 +772,7 @@ function saveHighlights(){localStorage.setItem('lectio-highlights',JSON.stringif
 const _p=loadPersisted();
 const S={
   book:_p.book||'John', chapter:_p.chapter||1,
-  translation1:_p.translation1||'ba:web',
+  translation1:_p.translation1||'esv:esv',
   comparedSpecs:[],
   showVerseNums:_p.showVerseNums??false,
   showChHead:_p.showChHead??true,
