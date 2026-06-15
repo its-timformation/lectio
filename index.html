@@ -192,6 +192,18 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 
 /* ── Toast ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg);font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;padding:9px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:350;}
+.install-banner{position:fixed;bottom:0;left:0;right:0;background:var(--accent);color:var(--bg);font-family:var(--sans);font-size:.75rem;font-weight:300;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;z-index:200;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.install-banner.visible{transform:translateY(0);}
+.install-banner-text{flex:1;line-height:1.4;}
+.install-banner-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.install-banner-btn{background:var(--bg);color:var(--accent);border:none;border-radius:3px;font-family:var(--sans);font-size:.7rem;font-weight:500;letter-spacing:.08em;padding:6px 12px;cursor:pointer;white-space:nowrap;}
+.install-banner-dismiss{background:none;border:none;color:var(--bg);opacity:.6;cursor:pointer;font-size:1.1rem;line-height:1;padding:4px;}
+.install-banner-dismiss:hover{opacity:1;}
+.install-settings-btn{width:100%;background:var(--hi);color:#fff;border:none;border-radius:3px;padding:10px 14px;font-family:var(--sans);font-size:.78rem;font-weight:400;letter-spacing:.06em;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:opacity .2s;min-height:44px;}
+.install-settings-btn:hover{opacity:.88;}
+.install-settings-btn.installed{background:var(--bg);border:1px solid var(--border);color:var(--text-soft);cursor:default;}
+.install-ios-note{font-family:var(--sans);font-size:.72rem;color:var(--text-muted);line-height:1.5;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:3px;display:none;}
+.install-ios-note.visible{display:block;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── API.Bible HTML ── */
@@ -497,6 +509,15 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <!-- Translation quick-switcher -->
 <div class="trans-switcher" id="transSwitcher"></div>
 
+<!-- Install banner -->
+<div class="install-banner" id="installBanner" role="complementary" aria-label="Install app">
+  <span class="install-banner-text">Add Lectio to your home screen for the best reading experience.</span>
+  <div class="install-banner-actions">
+    <button class="install-banner-btn" id="installBannerBtn">Install</button>
+    <button class="install-banner-dismiss" id="installBannerDismiss" aria-label="Dismiss">×</button>
+  </div>
+</div>
+
 <!-- Settings panel -->
 <aside class="settings-panel" id="settingsPanel">
   <div class="settings-header">
@@ -551,6 +572,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
     <div class="s-sec">
       <h3>Accessibility</h3>
       <button class="open-sec-btn" id="openAccessModal"><span>Reading Aids</span><span>↗</span></button>
+    </div>
+    <div class="s-sec">
+      <h3>Install</h3>
+      <button class="install-settings-btn" id="installSettingsBtn"><span>Add to Home Screen</span><span>↓</span></button>
+      <p class="install-ios-note" id="installIosNote">Tap the <strong>Share</strong> button in Safari, then choose <strong>Add to Home Screen</strong>.</p>
     </div>
     <div class="s-sec">
       <h3>About &amp; Info</h3>
@@ -620,8 +646,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.8.5</span></div>
-      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">May 2026</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.8.7</span></div>
+      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">June 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
     <div class="modal-sec">
@@ -852,7 +878,6 @@ function updateTransPickerButton(){
 function openTransPickerModal(){
   renderTransPicker();
   document.getElementById('transPickerModal').classList.add('open');
-  pushModalState();
 }
 
 function renderTransPicker(){
@@ -1594,8 +1619,9 @@ function openPlanModal(){
   tabs.querySelectorAll('.plan-tab').forEach(btn=>{btn.addEventListener('click',()=>{tabs.querySelectorAll('.plan-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPlanContent(btn.dataset.plan);});});
   renderPlanContent(activePlan);
   document.getElementById('planModal').classList.add('open');
-  pushModalState();
 }
+
+// ═══ COMPARE BADGE + PICKER ═════════════════════
 function updateCompareBadge(){
   const n=S.comparedSpecs.length;
   document.getElementById('compBadge').textContent=n===0?'None':`+${n} translation${n>1?'s':''}`;
@@ -1606,7 +1632,6 @@ function updateCompareBadge(){
 function openComparePicker(){
   renderComparePicker();
   document.getElementById('compareModal').classList.add('open');
-  pushModalState();
 }
 
 function renderComparePicker(){
@@ -1674,7 +1699,7 @@ async function saveApiBibleKey(){
 
 // ═══ SELECTOR ═══════════════════════════════════
 let selMode='books',selBook=null;
-function openSelector(){selMode='books';document.getElementById('selectorOverlay').classList.add('open');pushModalState();renderSelector();}
+function openSelector(){selMode='books';document.getElementById('selectorOverlay').classList.add('open');renderSelector();}
 function closeSelector(){document.getElementById('selectorOverlay').classList.remove('open');}
 function renderSelector(){
   const stage=document.getElementById('selectorStage');
@@ -1789,17 +1814,80 @@ function closeAll(){
   closeTransSwitcher();
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));
 }
-function anyPanelOpen(){
-  const ids=['settingsPanel','searchOverlay','bookmarksModal','advModal','accessModal','appInfoModal','planModal','compareModal','transPickerModal','selectorOverlay'];
-  return ids.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('open');});
-}
-function pushModalState(){if(!anyPanelOpen())history.pushState({modal:true},'');}
-window.addEventListener('popstate',()=>{if(anyPanelOpen())closeAll();});
 
 // ═══ BOOTSTRAP ══════════════════════════════════
 document.addEventListener('DOMContentLoaded',async()=>{
   // Service worker
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+  // ── PWA Install ──────────────────────────────────────────
+  let deferredInstallPrompt=null;
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  const installDismissed=localStorage.getItem('lectio-install-dismissed');
+  const installBanner=document.getElementById('installBanner');
+  const installBannerBtn=document.getElementById('installBannerBtn');
+  const installBannerDismiss=document.getElementById('installBannerDismiss');
+  const installSettingsBtn=document.getElementById('installSettingsBtn');
+  const installIosNote=document.getElementById('installIosNote');
+
+  function dismissInstallBanner(){
+    installBanner.classList.remove('visible');
+    localStorage.setItem('lectio-install-dismissed','1');
+  }
+
+  function updateInstallSettingsBtn(){
+    if(isStandalone){
+      installSettingsBtn.textContent='Already installed ✓';
+      installSettingsBtn.classList.add('installed');
+    }else if(isIos){
+      installSettingsBtn.innerHTML='<span>Add to Home Screen</span><span>↗</span>';
+    }else if(deferredInstallPrompt){
+      installSettingsBtn.innerHTML='<span>Install App</span><span>↓</span>';
+    }else{
+      installSettingsBtn.innerHTML='<span>Install App</span><span>↓</span>';
+      installSettingsBtn.classList.add('installed');
+      installSettingsBtn.title='Use your browser\'s install option';
+    }
+  }
+
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();
+    deferredInstallPrompt=e;
+    updateInstallSettingsBtn();
+    if(!isStandalone&&!installDismissed){
+      setTimeout(()=>installBanner.classList.add('visible'),1500);
+    }
+  });
+
+  window.addEventListener('appinstalled',()=>{
+    deferredInstallPrompt=null;
+    dismissInstallBanner();
+    updateInstallSettingsBtn();
+  });
+
+  async function triggerInstall(){
+    if(isIos){
+      installIosNote.classList.toggle('visible');
+      return;
+    }
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const{outcome}=await deferredInstallPrompt.userChoice;
+      if(outcome==='accepted'){deferredInstallPrompt=null;updateInstallSettingsBtn();}
+    }
+  }
+
+  installBannerBtn.addEventListener('click',()=>{dismissInstallBanner();triggerInstall();});
+  installBannerDismiss.addEventListener('click',dismissInstallBanner);
+  installSettingsBtn.addEventListener('click',triggerInstall);
+
+  // Show iOS banner on first visit if on iOS and not installed
+  if(isIos&&!isStandalone&&!installDismissed){
+    setTimeout(()=>installBanner.classList.add('visible'),1500);
+  }
+
+  updateInstallSettingsBtn();
 
   // Apple-touch-icon: load Cormorant Garamond then draw
   try{
@@ -1887,7 +1975,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Settings panel
   const panel=document.getElementById('settingsPanel');
-  document.getElementById('settingsToggle').addEventListener('click',()=>{const opening=!panel.classList.contains('open');panel.classList.toggle('open');if(opening)pushModalState();});
+  document.getElementById('settingsToggle').addEventListener('click',()=>panel.classList.toggle('open'));
   document.getElementById('settingsClose').addEventListener('click',()=>panel.classList.remove('open'));
   document.getElementById('settingsFooterClose')?.addEventListener('click',()=>panel.classList.remove('open'));
   document.addEventListener('click',e=>{
@@ -1910,7 +1998,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   const searchInputEl=document.getElementById('searchInput');
   function openSearch(){
     searchOverlay.classList.add('open');
-    pushModalState();
     setTimeout(()=>searchInputEl.focus(),100);
     renderRecentSearches();
   }
@@ -1967,7 +2054,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Advanced + Accessibility + App Info
   [['openAdvModal','advModal','closeAdvModal'],['openAccessModal','accessModal','closeAccessModal'],['openAppInfoModal','appInfoModal','closeAppInfoModal']].forEach(([openId,modalId,closeId])=>{
-    document.getElementById(openId).addEventListener('click',()=>{document.getElementById(modalId).classList.add('open');pushModalState();});
+    document.getElementById(openId).addEventListener('click',()=>document.getElementById(modalId).classList.add('open'));
     document.getElementById(closeId).addEventListener('click',()=>document.getElementById(modalId).classList.remove('open'));
     document.getElementById(modalId).addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
   });
@@ -2013,10 +2100,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
   // Bottom tab bar
   function setTabActive(id){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));if(id)document.getElementById(id)?.classList.add('tab-active');}
-  document.getElementById('tabSearch')?.addEventListener('click',()=>{const so=document.getElementById('searchOverlay');const was=so.classList.contains('open');closeAll();if(!was){so.classList.add('open');pushModalState();setTimeout(()=>document.getElementById('searchInput').focus(),120);}setTabActive(was?null:'tabSearch');});
-  document.getElementById('tabBookmarks')?.addEventListener('click',()=>{const bm=document.getElementById('bookmarksModal');const was=bm.classList.contains('open');closeAll();if(!was){renderBookmarksModal();bm.classList.add('open');pushModalState();}setTabActive(was?null:'tabBookmarks');});
+  document.getElementById('tabSearch')?.addEventListener('click',()=>{const so=document.getElementById('searchOverlay');const was=so.classList.contains('open');closeAll();if(!was){so.classList.add('open');setTimeout(()=>document.getElementById('searchInput').focus(),120);}setTabActive(was?null:'tabSearch');});
+  document.getElementById('tabBookmarks')?.addEventListener('click',()=>{const bm=document.getElementById('bookmarksModal');const was=bm.classList.contains('open');closeAll();if(!was){renderBookmarksModal();bm.classList.add('open');}setTabActive(was?null:'tabBookmarks');});
   document.getElementById('tabPlan')?.addEventListener('click',()=>{const pm=document.getElementById('planModal');const was=pm.classList.contains('open');closeAll();if(!was)openPlanModal();setTabActive(was?null:'tabPlan');});
-  document.getElementById('tabSettings')?.addEventListener('click',()=>{const sp=document.getElementById('settingsPanel');const was=sp.classList.contains('open');closeAll();if(!was){sp.classList.add('open');pushModalState();}setTabActive(was?null:'tabSettings');});
+  document.getElementById('tabSettings')?.addEventListener('click',()=>{const sp=document.getElementById('settingsPanel');const was=sp.classList.contains('open');closeAll();if(!was)sp.classList.add('open');setTabActive(was?null:'tabSettings');});
 
   // Swipe
   let sx=0,sy=0;
