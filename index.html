@@ -1837,10 +1837,12 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
 
   function updateInstallSettingsBtn(){
+    const installSection=installSettingsBtn.closest('.s-sec');
     if(isStandalone){
-      installSettingsBtn.textContent='Already installed ✓';
-      installSettingsBtn.classList.add('installed');
-    }else if(isIos){
+      if(installSection)installSection.style.display='none';
+      return;
+    }
+    if(isIos){
       installSettingsBtn.innerHTML='<span>Add to Home Screen</span><span>↗</span>';
     }else if(deferredInstallPrompt){
       installSettingsBtn.innerHTML='<span>Install App</span><span>↓</span>';
