@@ -621,7 +621,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.3</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.4</span></div>
       <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">October 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
@@ -977,11 +977,54 @@ function buildText(data,spec,isCol){
         });
       }else html+=`<div class="apibible-content">${raw}</div>`;
     }else{
-      html+=`<div class="${drop?'apibible-drop ':''}apibible-prose"><div class="apibible-content">${raw}</div></div>`;
+      html+=`<div class="${drop?'apibible-drop ':''}apibible-prose"><div class="apibible-content">${decorateApiBible(raw)}</div></div>`;
     }
     if(cr)S.copyrightLines.push(cr);
   }
   return html;
+}
+
+// API.Bible returns raw HTML whose verse spans carry data-verse-id ("ROM.7.1")
+// but no data-v, so attachVerseHandlers() finds nothing and verse selection is
+// dead for NLT/NIV/NASB in flowing prose. Tag those spans so all the existing
+// selection, highlight, bookmark, copy and share plumbing works on them.
+function decorateApiBible(raw){
+  try{
+    const doc=new DOMParser().parseFromString(`<div id="__r">${raw}</div>`,'text/html');
+    const root=doc.getElementById('__r');
+    if(!root)return raw;
+    const spans=[...root.querySelectorAll('[data-verse-id]')];
+    if(!spans.length)return raw;
+    // Group the spans belonging to each verse (API.Bible splits a verse across several)
+    const groups=new Map();
+    spans.forEach(sp=>{
+      const num=parseInt((sp.getAttribute('data-verse-id')||'').split('.').pop(),10);
+      if(!num)return;
+      if(!groups.has(num))groups.set(num,[]);
+      groups.get(num).push(sp);
+    });
+    groups.forEach((els,num)=>{
+      const hkey=`${S.book}|${S.chapter}|${num}`;
+      const colour=S.highlights[hkey];
+      const marked=S.bookmarks.some(b=>b.book===S.book&&b.ch===S.chapter&&b.v===num);
+      // Full verse text, excluding the superscript verse number
+      const text=els.map(sp=>{
+        const c=sp.cloneNode(true);
+        c.querySelectorAll('[data-number]').forEach(n=>n.remove());
+        return c.textContent;
+      }).join('').replace(/\s+/g,' ').trim();
+      els.forEach((sp,i)=>{
+        sp.classList.add('v-span');
+        sp.setAttribute('data-v',num);
+        if(colour)sp.setAttribute('data-highlight',colour);
+        if(marked)sp.setAttribute('data-bookmarked','true');
+        // copySelected/shareSelected read the first match, so text lives there
+        if(i===0)sp.setAttribute('data-txt',text);
+        if(!S.showVerseNums)sp.querySelectorAll('[data-number]').forEach(n=>n.remove());
+      });
+    });
+    return root.innerHTML;
+  }catch(e){return raw;}
 }
 
 function applyBodyAttrs(){
@@ -1070,7 +1113,9 @@ function attachVerseHandlers(){
       const v=el.dataset.v;
       if(S.selectedVerses.has(v))S.selectedVerses.delete(v);
       else S.selectedVerses.add(v);
-      el.classList.toggle('v-selected',S.selectedVerses.has(v));
+      // A verse may span several elements (API.Bible) — mark them all
+      const on=S.selectedVerses.has(v);
+      document.querySelectorAll(`[data-v="${v}"]`).forEach(n=>n.classList.toggle('v-selected',on));
       updateActionBar();
     });
   });
