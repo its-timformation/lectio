@@ -109,7 +109,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 
 /* ── Page & reading ── */
 .page{padding-top:calc(var(--bar-h) + var(--sat));padding-bottom:96px;min-height:100vh;}
-.reading-surface{max-width:var(--read-width);margin:0 auto;padding:0 28px;transition:opacity .3s;}
+.reading-surface{max-width:var(--read-width);margin:0 auto;padding:0 28px;transition:opacity .3s;-webkit-user-select:text;user-select:text;}
+.reading-surface .verse-line,.reading-surface .v-span,.reading-surface .apibible-content,.reading-surface .passage{-webkit-user-select:text;user-select:text;}
 .reading-surface.loading{opacity:.2;pointer-events:none;}
 /* ── Compare tab strip (mobile) ── */
 .comp-tab-strip{display:none;position:sticky;top:calc(var(--bar-h) + var(--sat));z-index:40;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:background-color .5s,border-color .5s;}
@@ -620,7 +621,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.1</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.2</span></div>
       <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">October 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
