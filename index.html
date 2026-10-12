@@ -621,7 +621,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.2</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.3</span></div>
       <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">October 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
@@ -1049,20 +1049,24 @@ function step(dir){
 }
 
 // ═══ VERSE SELECTION + ACTION BAR ═══════════════
-// Track touch press duration to distinguish tap (verse select) from long-press (text select)
+// Track pointer position to distinguish a click from a drag (text selection)
+let _ptrDownX=0,_ptrDownY=0;
+document.addEventListener('pointerdown',e=>{_ptrDownX=e.clientX;_ptrDownY=e.clientY;},{passive:true,capture:true});
+// Track touch duration to distinguish tap from long-press on mobile
 let _touchStartTime=0;
-let _touchMoved=false;
-document.addEventListener('touchstart',()=>{_touchStartTime=Date.now();_touchMoved=false;},{passive:true,capture:true});
-document.addEventListener('touchmove',()=>{_touchMoved=true;},{passive:true,capture:true});
+document.addEventListener('touchstart',()=>{_touchStartTime=Date.now();},{passive:true,capture:true});
 
 function attachVerseHandlers(){
   document.querySelectorAll('.verse-line[data-v],.v-span[data-v]').forEach(el=>{
     el.addEventListener('click',e=>{
       if(e.target.closest('.vab-swatch,.vab-btn'))return;
-      // If user has selected text, don't intercept
+      // If the pointer moved more than 6px it was a drag (text selection) — bail out
+      const dist=Math.hypot(e.clientX-_ptrDownX,e.clientY-_ptrDownY);
+      if(dist>6)return;
+      // If there's already a text selection, don't intercept
       if(window.getSelection&&window.getSelection().toString().length>0)return;
-      // If touch lasted >400ms (long-press for text selection) or finger moved, bail out
-      if(_touchStartTime&&(Date.now()-_touchStartTime>400||_touchMoved))return;
+      // On mobile: if press lasted >400ms it was a long-press for text selection
+      if(_touchStartTime&&(Date.now()-_touchStartTime>400))return;
       const v=el.dataset.v;
       if(S.selectedVerses.has(v))S.selectedVerses.delete(v);
       else S.selectedVerses.add(v);
