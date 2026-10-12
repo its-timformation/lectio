@@ -192,23 +192,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 
 /* ── Toast ── */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg);font-family:var(--sans);font-size:.72rem;font-weight:400;letter-spacing:.1em;padding:9px 20px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:350;}
-.install-banner{position:fixed;left:14px;right:14px;bottom:14px;background:var(--bg-sub);border:1px solid var(--border);border-radius:6px;padding:14px 16px;box-shadow:0 4px 20px var(--shadow);z-index:200;transform:translateY(calc(100% + 24px));transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:420px;margin:0 auto;}
-.install-banner.visible{transform:translateY(0);}
-.install-banner-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.install-banner-label{font-family:var(--sc);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--hi);margin-bottom:4px;}
-.install-banner-text{font-family:var(--serif);font-size:.92rem;font-style:italic;color:var(--text);line-height:1.4;}
-.install-banner-dismiss{background:none;border:none;color:var(--text-muted);font-size:1.15rem;line-height:1;padding:0 0 0 8px;cursor:pointer;flex-shrink:0;}
-.install-banner-dismiss:hover{color:var(--text);}
-.install-banner-actions{margin-top:11px;display:flex;align-items:center;gap:6px;}
-.install-banner-btn{background:transparent;color:var(--text);border:1px solid var(--text);border-radius:3px;font-family:var(--sans);font-size:.68rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;cursor:pointer;}
-.install-banner-btn:hover{background:var(--text);color:var(--bg);}
-.install-banner-later{background:none;border:none;color:var(--text-muted);font-family:var(--sans);font-size:.68rem;letter-spacing:.06em;padding:7px 8px;cursor:pointer;}
-.install-banner-later:hover{color:var(--text-soft);}
-.install-settings-btn{width:100%;background:var(--hi);color:#fff;border:none;border-radius:3px;padding:10px 14px;font-family:var(--sans);font-size:.78rem;font-weight:400;letter-spacing:.06em;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;transition:opacity .2s;min-height:44px;}
-.install-settings-btn:hover{opacity:.88;}
-.install-settings-btn.installed{background:var(--bg);border:1px solid var(--border);color:var(--text-soft);cursor:default;}
-.install-ios-note{font-family:var(--sans);font-size:.72rem;color:var(--text-muted);line-height:1.5;margin-top:8px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:3px;display:none;}
-.install-ios-note.visible{display:block;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
 /* ── API.Bible HTML ── */
@@ -514,21 +497,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
 <!-- Translation quick-switcher -->
 <div class="trans-switcher" id="transSwitcher"></div>
 
-<!-- Install banner -->
-<div class="install-banner" id="installBanner" role="complementary" aria-label="Install app">
-  <div class="install-banner-row">
-    <div>
-      <div class="install-banner-label">Lectio</div>
-      <div class="install-banner-text">Add to your home screen for a calmer reading space.</div>
-    </div>
-    <button class="install-banner-dismiss" id="installBannerDismiss" aria-label="Dismiss">×</button>
-  </div>
-  <div class="install-banner-actions">
-    <button class="install-banner-btn" id="installBannerBtn">Install</button>
-    <button class="install-banner-later" id="installBannerLater">Not now</button>
-  </div>
-</div>
-
 <!-- Settings panel -->
 <aside class="settings-panel" id="settingsPanel">
   <div class="settings-header">
@@ -583,11 +551,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
     <div class="s-sec">
       <h3>Accessibility</h3>
       <button class="open-sec-btn" id="openAccessModal"><span>Reading Aids</span><span>↗</span></button>
-    </div>
-    <div class="s-sec">
-      <h3>Install</h3>
-      <button class="install-settings-btn" id="installSettingsBtn"><span>Add to Home Screen</span><span>↓</span></button>
-      <p class="install-ios-note" id="installIosNote">Tap the <strong>Share</strong> button in Safari, then choose <strong>Add to Home Screen</strong>.</p>
     </div>
     <div class="s-sec">
       <h3>About &amp; Info</h3>
@@ -657,8 +620,8 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--serif);font-s
   <div class="modal-card wide">
     <div class="modal-title"><span>App Info &amp; Translation Keys</span><button class="modal-close" id="closeAppInfoModal">Close ×</button></div>
     <div class="modal-sec">
-      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.0</span></div>
-      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">June 2026</span></div>
+      <div class="appinfo-row"><span>Version</span><span class="appinfo-val" id="appVersion">1.9.1</span></div>
+      <div class="appinfo-row"><span>Last updated</span><span class="appinfo-val" id="appDate">October 2026</span></div>
       <div class="appinfo-row"><span>Built with</span><span class="appinfo-val">bible-api.com · api.esv.org · rest.api.bible</span></div>
     </div>
     <div class="modal-sec">
@@ -783,7 +746,7 @@ function saveHighlights(){localStorage.setItem('lectio-highlights',JSON.stringif
 const _p=loadPersisted();
 const S={
   book:_p.book||'John', chapter:_p.chapter||1,
-  translation1:_p.translation1||'esv:esv',
+  translation1:_p.translation1||'ba:web',
   comparedSpecs:[],
   showVerseNums:_p.showVerseNums??false,
   showChHead:_p.showChHead??true,
@@ -1085,10 +1048,20 @@ function step(dir){
 }
 
 // ═══ VERSE SELECTION + ACTION BAR ═══════════════
+// Track touch press duration to distinguish tap (verse select) from long-press (text select)
+let _touchStartTime=0;
+let _touchMoved=false;
+document.addEventListener('touchstart',()=>{_touchStartTime=Date.now();_touchMoved=false;},{passive:true,capture:true});
+document.addEventListener('touchmove',()=>{_touchMoved=true;},{passive:true,capture:true});
+
 function attachVerseHandlers(){
   document.querySelectorAll('.verse-line[data-v],.v-span[data-v]').forEach(el=>{
     el.addEventListener('click',e=>{
       if(e.target.closest('.vab-swatch,.vab-btn'))return;
+      // If user has selected text, don't intercept
+      if(window.getSelection&&window.getSelection().toString().length>0)return;
+      // If touch lasted >400ms (long-press for text selection) or finger moved, bail out
+      if(_touchStartTime&&(Date.now()-_touchStartTime>400||_touchMoved))return;
       const v=el.dataset.v;
       if(S.selectedVerses.has(v))S.selectedVerses.delete(v);
       else S.selectedVerses.add(v);
@@ -1830,79 +1803,6 @@ function closeAll(){
 document.addEventListener('DOMContentLoaded',async()=>{
   // Service worker
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
-  // ── PWA Install ──────────────────────────────────────────
-  let deferredInstallPrompt=null;
-  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
-  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
-  const installDismissed=localStorage.getItem('lectio-install-dismissed');
-  const installBanner=document.getElementById('installBanner');
-  const installBannerBtn=document.getElementById('installBannerBtn');
-  const installBannerDismiss=document.getElementById('installBannerDismiss');
-  const installBannerLater=document.getElementById('installBannerLater');
-  const installSettingsBtn=document.getElementById('installSettingsBtn');
-  const installIosNote=document.getElementById('installIosNote');
-
-  function dismissInstallBanner(){
-    installBanner.classList.remove('visible');
-    localStorage.setItem('lectio-install-dismissed','1');
-  }
-
-  function updateInstallSettingsBtn(){
-    const installSection=installSettingsBtn.closest('.s-sec');
-    if(isStandalone){
-      if(installSection)installSection.style.display='none';
-      return;
-    }
-    if(isIos){
-      installSettingsBtn.innerHTML='<span>Add to Home Screen</span><span>↗</span>';
-    }else if(deferredInstallPrompt){
-      installSettingsBtn.innerHTML='<span>Install App</span><span>↓</span>';
-    }else{
-      installSettingsBtn.innerHTML='<span>Install App</span><span>↓</span>';
-      installSettingsBtn.classList.add('installed');
-      installSettingsBtn.title='Use your browser\'s install option';
-    }
-  }
-
-  window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredInstallPrompt=e;
-    updateInstallSettingsBtn();
-    if(!isStandalone&&!installDismissed){
-      setTimeout(()=>installBanner.classList.add('visible'),1500);
-    }
-  });
-
-  window.addEventListener('appinstalled',()=>{
-    deferredInstallPrompt=null;
-    dismissInstallBanner();
-    updateInstallSettingsBtn();
-  });
-
-  async function triggerInstall(){
-    if(isIos){
-      installIosNote.classList.toggle('visible');
-      return;
-    }
-    if(deferredInstallPrompt){
-      deferredInstallPrompt.prompt();
-      const{outcome}=await deferredInstallPrompt.userChoice;
-      if(outcome==='accepted'){deferredInstallPrompt=null;updateInstallSettingsBtn();}
-    }
-  }
-
-  installBannerBtn.addEventListener('click',()=>{dismissInstallBanner();triggerInstall();});
-  installBannerDismiss.addEventListener('click',dismissInstallBanner);
-  installBannerLater?.addEventListener('click',dismissInstallBanner);
-  installSettingsBtn.addEventListener('click',triggerInstall);
-
-  // Show iOS banner on first visit if on iOS and not installed
-  if(isIos&&!isStandalone&&!installDismissed){
-    setTimeout(()=>installBanner.classList.add('visible'),1500);
-  }
-
-  updateInstallSettingsBtn();
 
   // Apple-touch-icon: load Cormorant Garamond then draw
   try{
